@@ -528,7 +528,16 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
   <div class="info-row"><span class="info-key">비고</span><span class="info-val"><%= asset.getOrDefault("remark","-") %></span></div>
 
   <%
-    String navBuilding    = loc;
+    /* location에서 건물명 추출 (| 로 구분된 경우 두 번째 항목) */
+    String navBuilding = loc;
+    if (navBuilding.contains("|")) {
+        String[] parts = navBuilding.split("\\|");
+        if (parts.length > 1) {
+            navBuilding = parts[1].trim();
+            /* "제1공학관" → "1공학관" 정규화 */
+            navBuilding = navBuilding.replaceAll("^제", "");
+        }
+    }
     String navRoom        = dloc;
     String navRoomId      = asset.getOrDefault("room_id","");
     String navBuildingEnc = "";

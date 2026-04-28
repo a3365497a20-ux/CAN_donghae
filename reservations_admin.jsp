@@ -11,11 +11,50 @@
     String filterType=request.getParameter("type");if(filterType==null)filterType="";
     String filterStatus=request.getParameter("status");if(filterStatus==null)filterStatus="";
 
-    // ── POST 처리 (예약 취소) ──
+    // ── POST 처리 (상태 변경/삭제/연장) ──
     if("POST".equals(request.getMethod())){
         request.setCharacterEncoding("UTF-8");
         String act=request.getParameter("act");
-        if("cancelReserve".equals(act)){
+        if("extendReserve".equals(act)){
+            String rid=request.getParameter("reserveId");
+            String extendHours=request.getParameter("extendHours");
+            String type=request.getParameter("type");if(type==null)type="";
+            try{
+                int hours=Integer.parseInt(extendHours!=null?extendHours:"1");
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                Connection c=DriverManager.getConnection(DBURL,"root","1234");
+                int n=0;
+                if("room".equals(type)){
+                    PreparedStatement ps=c.prepareStatement("UPDATE room_reservations SET end_time=DATE_ADD(end_time,INTERVAL ? HOUR) WHERE reserve_id=?");
+                    ps.setInt(1,hours);ps.setString(2,rid);n=ps.executeUpdate();ps.close();
+                } else {
+                    PreparedStatement ps=c.prepareStatement("UPDATE reservations SET end_time=DATE_ADD(end_time,INTERVAL ? HOUR) WHERE reserve_id=?");
+                    ps.setInt(1,hours);ps.setString(2,rid);n=ps.executeUpdate();ps.close();
+                }
+                c.close();
+                okMsg=n>0?"예약 #"+rid+" 이(가) "+hours+"시간 연장되었습니다":"해당 예약을 찾을 수 없습니다.";
+            }catch(Exception e){errMsg="연장 오류: "+e.getMessage();}
+        }
+        else if("updateStatus".equals(act)){
+            String rid=request.getParameter("reserveId");
+            String newStatus=request.getParameter("newStatus");
+            String type=request.getParameter("type");if(type==null)type="";
+            try{
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                Connection c=DriverManager.getConnection(DBURL,"root","1234");
+                int n=0;
+                if("room".equals(type)){
+                    PreparedStatement ps=c.prepareStatement("UPDATE room_reservations SET status=? WHERE reserve_id=?");
+                    ps.setString(1,newStatus);ps.setString(2,rid);n=ps.executeUpdate();ps.close();
+                } else {
+                    PreparedStatement ps=c.prepareStatement("UPDATE reservations SET status=? WHERE reserve_id=?");
+                    ps.setString(1,newStatus);ps.setString(2,rid);n=ps.executeUpdate();ps.close();
+                }
+                c.close();
+                okMsg=n>0?"예약 #"+rid+" 상태를 '"+newStatus+"'으로 변경했습니다":"해당 예약을 찾을 수 없습니다.";
+            }catch(Exception e){errMsg="상태 변경 오류: "+e.getMessage();}
+        }
+        else if("deleteReserve".equals(act)){
             String rid=request.getParameter("reserveId");
             String type=request.getParameter("type");if(type==null)type="";
             try{
@@ -23,15 +62,15 @@
                 Connection c=DriverManager.getConnection(DBURL,"root","1234");
                 int n=0;
                 if("room".equals(type)){
-                    PreparedStatement ps=c.prepareStatement("UPDATE room_reservations SET status='취소' WHERE reserve_id=?");
+                    PreparedStatement ps=c.prepareStatement("DELETE FROM room_reservations WHERE reserve_id=?");
                     ps.setString(1,rid);n=ps.executeUpdate();ps.close();
                 } else {
-                    PreparedStatement ps=c.prepareStatement("UPDATE reservations SET status='취소' WHERE reserve_id=?");
+                    PreparedStatement ps=c.prepareStatement("DELETE FROM reservations WHERE reserve_id=?");
                     ps.setString(1,rid);n=ps.executeUpdate();ps.close();
                 }
                 c.close();
-                okMsg=n>0?"예약 #"+rid+" 취소 완료":"해당 예약을 찾을 수 없습니다.";
-            }catch(Exception e){errMsg="취소 오류: "+e.getMessage();}
+                okMsg=n>0?"예약 #"+rid+" 삭제 완료":"해당 예약을 찾을 수 없습니다.";
+            }catch(Exception e){errMsg="삭제 오류: "+e.getMessage();}
         }
     }
 
@@ -40,6 +79,12 @@
     try{
         Class.forName("com.mysql.cj.jdbc.Driver");
         Connection conn=DriverManager.getConnection(DBURL,"root","1234");
+
+        // 시간이 지난 예약을 자동으로 "사용완료"로 변경
+        String updateSql="UPDATE reservations SET status='사용완료' WHERE status='예약완료' AND CONCAT(reserve_date,' ',end_time) < NOW()";
+        conn.createStatement().executeUpdate(updateSql);
+        updateSql="UPDATE room_reservations SET status='사용완료' WHERE status='예약완료' AND CONCAT(reserve_date,' ',end_time) < NOW()";
+        conn.createStatement().executeUpdate(updateSql);
 
         // 자산 예약 조회
         String sql="SELECT r.reserve_id,r.user_id,u.user_name,r.asset_no,'자산' AS room_type,IFNULL(a.item_name,'자산') AS item_name,r.reserve_date,r.start_time,r.end_time,r.status,r.purpose,'asset' AS reserve_type ";
@@ -126,25 +171,42 @@
 <% if(!okMsg.isEmpty()){%><div class="alert-ok"><i class="bi bi-check-circle-fill"></i><%= okMsg %></div><%}%>
 <% if(!errMsg.isEmpty()){%><div class="alert-err"><i class="bi bi-exclamation-circle-fill"></i><%= errMsg %></div><%}%>
 
-<!-- 필터 탭 -->
-<div>
-  <div style="font-size:12px;color:var(--txt2);font-weight:700;margin-bottom:10px;text-transform:uppercase;">공간 유형</div>
-  <div class="filter-tabs">
-    <a href="/CAN/reservations_admin.jsp" class="filter-tab <%= filterType.isEmpty()?"active":"" %>">전체</a>
-    <a href="/CAN/reservations_admin.jsp?type=강의실" class="filter-tab <%= "강의실".equals(filterType)?"active":"" %>">강의실</a>
-    <a href="/CAN/reservations_admin.jsp?type=세미나실" class="filter-tab <%= "세미나실".equals(filterType)?"active":"" %>">세미나실</a>
-    <a href="/CAN/reservations_admin.jsp?type=컴퓨터실" class="filter-tab <%= "컴퓨터실".equals(filterType)?"active":"" %>">컴퓨터실</a>
-    <a href="/CAN/reservations_admin.jsp?type=자산" class="filter-tab <%= "자산".equals(filterType)?"active":"" %>">자산</a>
+<!-- 필터 카드 -->
+<div class="card" style="margin-bottom:20px;">
+  <div class="card-head">
+    <div class="ch-icon si-blue"><i class="bi bi-funnel" style="color:var(--blue)"></i></div>
+    <div>
+      <div class="ch-title">필터 설정</div>
+      <div class="ch-sub">공간 유형과 상태로 예약을 검색합니다</div>
+    </div>
   </div>
-</div>
+  <div class="card-body" style="padding:20px 26px;">
+    <!-- 공간 유형 필터 -->
+    <div style="margin-bottom:20px;">
+      <div style="font-size:12px;color:var(--txt);font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px;">
+        <i class="bi bi-building" style="color:var(--blue)"></i>공간 유형
+      </div>
+      <div class="filter-tabs">
+        <a href="/CAN/reservations_admin.jsp" class="filter-tab <%= filterType.isEmpty()?"active":"" %>">전체</a>
+        <a href="/CAN/reservations_admin.jsp?type=강의실" class="filter-tab <%= "강의실".equals(filterType)?"active":"" %>">강의실</a>
+        <a href="/CAN/reservations_admin.jsp?type=세미나실" class="filter-tab <%= "세미나실".equals(filterType)?"active":"" %>">세미나실</a>
+        <a href="/CAN/reservations_admin.jsp?type=컴퓨터실" class="filter-tab <%= "컴퓨터실".equals(filterType)?"active":"" %>">컴퓨터실</a>
+        <a href="/CAN/reservations_admin.jsp?type=자산" class="filter-tab <%= "자산".equals(filterType)?"active":"" %>">자산</a>
+      </div>
+    </div>
 
-<div style="margin-bottom:20px;">
-  <div style="font-size:12px;color:var(--txt2);font-weight:700;margin-bottom:10px;text-transform:uppercase;">상태</div>
-  <div class="filter-tabs">
-    <a href="/CAN/reservations_admin.jsp<%= !filterType.isEmpty()?"?type="+java.net.URLEncoder.encode(filterType,"UTF-8"):"" %>" class="filter-tab <%= filterStatus.isEmpty()?"active":"" %>">전체</a>
-    <a href="/CAN/reservations_admin.jsp?status=예약완료<%= !filterType.isEmpty()?"&type="+java.net.URLEncoder.encode(filterType,"UTF-8"):"" %>" class="filter-tab <%= "예약완료".equals(filterStatus)?"active":"" %>">예약완료</a>
-    <a href="/CAN/reservations_admin.jsp?status=취소<%= !filterType.isEmpty()?"&type="+java.net.URLEncoder.encode(filterType,"UTF-8"):"" %>" class="filter-tab <%= "취소".equals(filterStatus)?"active":"" %>">취소</a>
-    <a href="/CAN/reservations_admin.jsp?status=완료<%= !filterType.isEmpty()?"&type="+java.net.URLEncoder.encode(filterType,"UTF-8"):"" %>" class="filter-tab <%= "완료".equals(filterStatus)?"active":"" %>">완료</a>
+    <!-- 상태 필터 -->
+    <div>
+      <div style="font-size:12px;color:var(--txt);font-weight:700;margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px;">
+        <i class="bi bi-check2-circle" style="color:var(--amber)"></i>상태
+      </div>
+      <div class="filter-tabs">
+        <a href="/CAN/reservations_admin.jsp<%= !filterType.isEmpty()?"?type="+java.net.URLEncoder.encode(filterType,"UTF-8"):"" %>" class="filter-tab <%= filterStatus.isEmpty()?"active":"" %>">전체</a>
+        <a href="/CAN/reservations_admin.jsp?status=예약완료<%= !filterType.isEmpty()?"&type="+java.net.URLEncoder.encode(filterType,"UTF-8"):"" %>" class="filter-tab <%= "예약완료".equals(filterStatus)?"active":"" %>">예약완료</a>
+        <a href="/CAN/reservations_admin.jsp?status=취소<%= !filterType.isEmpty()?"&type="+java.net.URLEncoder.encode(filterType,"UTF-8"):"" %>" class="filter-tab <%= "취소".equals(filterStatus)?"active":"" %>">취소</a>
+        <a href="/CAN/reservations_admin.jsp?status=완료<%= !filterType.isEmpty()?"&type="+java.net.URLEncoder.encode(filterType,"UTF-8"):"" %>" class="filter-tab <%= "완료".equals(filterStatus)?"active":"" %>">완료</a>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -160,7 +222,7 @@
   <div style="overflow-x:auto">
     <table class="tbl">
       <thead>
-        <tr><th>#</th><th>공간</th><th>신청자</th><th>날짜</th><th>시간</th><th>사용목적</th><th>상태</th><th>관리자 취소</th></tr>
+        <tr><th>#</th><th>공간</th><th>신청자</th><th>날짜</th><th>시간</th><th>사용목적</th><th>상태</th><th>관리</th></tr>
       </thead>
       <tbody>
       <%for(Map<String,String> rv:allReserves){
@@ -177,18 +239,42 @@
         <td style="font-family:var(--mono);font-size:12px"><%= rv.get("start") %>~<%= rv.get("end") %></td>
         <td style="font-size:12px"><%= rv.get("purpose").isEmpty()?"-":rv.get("purpose") %></td>
         <td><span class="<%= bc %>"><%= st %></span></td>
-        <td>
-          <%if("예약완료".equals(st)){
-              String rtype=rv.get("rtype")!=null?rv.get("rtype"):"asset";
-          %>
-          <form method="post" action="/CAN/reservations_admin.jsp" style="margin:0"
-                onsubmit="return confirm('[관리자] 예약 #<%= rv.get("id") %>을(를) 취소하시겠습니까?')">
-            <input type="hidden" name="act" value="cancelReserve">
+        <td style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">
+          <%if("사용완료".equals(st)){%>
+          <form method="post" action="/CAN/reservations_admin.jsp" accept-charset="UTF-8" style="margin:0;display:flex;gap:4px" onchange="if(confirm('[관리자] 예약 #<%= rv.get("id") %>을(를) '+this.querySelector('select').value+' 연장하시겠습니까?')) this.submit(); else this.reset()">
+            <input type="hidden" name="act" value="extendReserve">
             <input type="hidden" name="reserveId" value="<%= rv.get("id") %>">
-            <input type="hidden" name="type" value="<%= rtype %>">
-            <button type="submit" class="btn-danger"><i class="bi bi-x-circle"></i>취소</button>
+            <input type="hidden" name="type" value="<%= rv.get("rtype") %>">
+            <select name="extendHours" style="padding:4px 8px;font-size:12px;border:1.5px solid var(--line2);border-radius:6px;outline:none;background:var(--white);color:var(--txt);cursor:pointer;">
+              <option value="">연장</option>
+              <option value="1">1시간 연장</option>
+              <option value="2">2시간 연장</option>
+              <option value="4">4시간 연장</option>
+              <option value="8">8시간 연장</option>
+            </select>
           </form>
-          <%}else{%><span style="font-size:12px;color:var(--txt3)">-</span><%}%>
+          <%}else{%>
+          <form method="post" action="/CAN/reservations_admin.jsp" accept-charset="UTF-8" style="margin:0;display:flex;gap:4px" onchange="if(confirm('[관리자] 예약 #<%= rv.get("id") %>의 상태를 변경하시겠습니까?')) this.submit(); else this.reset()">
+            <input type="hidden" name="act" value="updateStatus">
+            <input type="hidden" name="reserveId" value="<%= rv.get("id") %>">
+            <input type="hidden" name="type" value="<%= rv.get("rtype") %>">
+            <select name="newStatus" style="padding:4px 8px;font-size:12px;border:1.5px solid var(--line2);border-radius:6px;outline:none;background:var(--white);color:var(--txt);cursor:pointer;">
+              <option value="<%= st %>"><%= st %></option>
+              <option value="예약중">예약중</option>
+              <option value="보류">보류</option>
+              <option value="예약완료">예약완료</option>
+              <option value="취소">취소</option>
+              <option value="완료">완료</option>
+            </select>
+          </form>
+          <%}%>
+          <form method="post" action="/CAN/reservations_admin.jsp" accept-charset="UTF-8" style="margin:0"
+                onsubmit="return confirm('[관리자] 예약 #<%= rv.get("id") %>을(를) 삭제하시겠습니까?\\n이 작업은 되돌릴 수 없습니다.')">
+            <input type="hidden" name="act" value="deleteReserve">
+            <input type="hidden" name="reserveId" value="<%= rv.get("id") %>">
+            <input type="hidden" name="type" value="<%= rv.get("rtype") %>">
+            <button type="submit" class="btn-ghost" style="padding:4px 8px;font-size:12px;border-color:var(--red);color:var(--red);"><i class="bi bi-trash"></i>삭제</button>
+          </form>
         </td>
       </tr>
       <%}%>

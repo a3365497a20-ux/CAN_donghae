@@ -6,29 +6,50 @@
     int total=0;
     List<Map<String,String>> myReserves=new ArrayList<>();
     String cancelMsg="",cancelErr="";
-    // 예약 취소 처리 (POST)
+    // 예약 취소/연장 처리 (POST)
     if("POST".equals(request.getMethod())){
         request.setCharacterEncoding("UTF-8");
+        String act=request.getParameter("act");
         String cancelId=request.getParameter("cancelId");
         if(cancelId!=null&&!cancelId.trim().isEmpty()){
             try{
                 Class.forName("com.mysql.cj.jdbc.Driver");
                 Connection cc=DriverManager.getConnection("jdbc:mysql://localhost:3306/campusnav?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true","root","1234");
-                // 자산 예약 취소
-                PreparedStatement ps=cc.prepareStatement("UPDATE reservations SET status='취소' WHERE reserve_id=? AND user_id=? AND status='예약완료'");
-                ps.setString(1,cancelId.trim());ps.setString(2,loginUser);
-                int n=ps.executeUpdate();ps.close();
-                // 방 예약 취소
-                ps=cc.prepareStatement("UPDATE room_reservations SET status='취소' WHERE reserve_id=? AND user_id=? AND status='예약완료'");
-                ps.setString(1,cancelId.trim());ps.setString(2,loginUser);
-                int m=ps.executeUpdate();ps.close();cc.close();
-                cancelMsg=(n+m)>0?"예약이 취소되었습니다.":"취소할 수 없는 예약입니다.";
-            }catch(Exception e){cancelErr="취소 처리 오류: "+e.getMessage();}
+                if("extend".equals(act)){
+                    String extendHours=request.getParameter("extendHours");
+                    int hours=Integer.parseInt(extendHours!=null?extendHours:"1");
+                    // 자산 예약 연장
+                    PreparedStatement ps=cc.prepareStatement("UPDATE reservations SET end_time=DATE_ADD(end_time,INTERVAL ? HOUR) WHERE reserve_id=? AND user_id=? AND status='사용완료'");
+                    ps.setInt(1,hours);ps.setString(2,cancelId.trim());ps.setString(3,loginUser);
+                    int n=ps.executeUpdate();ps.close();
+                    // 방 예약 연장
+                    ps=cc.prepareStatement("UPDATE room_reservations SET end_time=DATE_ADD(end_time,INTERVAL ? HOUR) WHERE reserve_id=? AND user_id=? AND status='사용완료'");
+                    ps.setInt(1,hours);ps.setString(2,cancelId.trim());ps.setString(3,loginUser);
+                    int m=ps.executeUpdate();ps.close();cc.close();
+                    cancelMsg=(n+m)>0?"예약이 "+hours+"시간 연장되었습니다.":"연장할 수 없는 예약입니다.";
+                } else {
+                    // 예약 취소
+                    PreparedStatement ps=cc.prepareStatement("UPDATE reservations SET status='취소' WHERE reserve_id=? AND user_id=? AND status='예약완료'");
+                    ps.setString(1,cancelId.trim());ps.setString(2,loginUser);
+                    int n=ps.executeUpdate();ps.close();
+                    ps=cc.prepareStatement("UPDATE room_reservations SET status='취소' WHERE reserve_id=? AND user_id=? AND status='예약완료'");
+                    ps.setString(1,cancelId.trim());ps.setString(2,loginUser);
+                    int m=ps.executeUpdate();ps.close();cc.close();
+                    cancelMsg=(n+m)>0?"예약이 취소되었습니다.":"취소할 수 없는 예약입니다.";
+                }
+            }catch(Exception e){cancelErr="처리 오류: "+e.getMessage();}
         }
     }
     try{
         Class.forName("com.mysql.cj.jdbc.Driver");
         Connection conn=DriverManager.getConnection("jdbc:mysql://localhost:3306/campusnav?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true","root","1234");
+
+        // 시간이 지난 예약을 자동으로 "사용완료"로 변경
+        String updateSql="UPDATE reservations SET status='사용완료' WHERE status='예약완료' AND CONCAT(reserve_date,' ',end_time) < NOW()";
+        conn.createStatement().executeUpdate(updateSql);
+        updateSql="UPDATE room_reservations SET status='사용완료' WHERE status='예약완료' AND CONCAT(reserve_date,' ',end_time) < NOW()";
+        conn.createStatement().executeUpdate(updateSql);
+
         ResultSet rs=conn.createStatement().executeQuery("SELECT COUNT(*) FROM assets");
         if(rs.next())total=rs.getInt(1);rs.close();
 
@@ -220,7 +241,7 @@
       <div style="overflow-x:auto">
         <table class="tbl">
           <thead>
-            <tr><th>자산명</th><th>날짜</th><th>시간</th><th>상태</th><th>취소</th></tr>
+            <tr><th>자산명</th><th>날짜</th><th>시간</th><th>상태</th><th>관리</th></tr>
           </thead>
           <tbody>
           <%for(Map<String,String> rv:myReserves){
@@ -233,12 +254,24 @@
             <td style="font-family:var(--mono);font-size:13px"><%= rv.get("date") %></td>
             <td style="font-family:var(--mono);font-size:13px"><%= rv.get("start") %>~<%= rv.get("end") %></td>
             <td><span class="<%= bc %>"><%= st %></span></td>
-            <td>
-              <% if("예약완료".equals(st)){%>
+            <td style="display:flex;gap:6px;flex-wrap:wrap;">
+              <% if("사용완료".equals(st)){%>
+              <form method="post" action="/CAN/main_student.jsp" style="margin:0;display:contents" onchange="if(confirm('예약을 '+this.querySelector('select').value+' 연장하시겠습니까?')) this.submit(); else this.reset()">
+                <input type="hidden" name="act" value="extend">
+                <input type="hidden" name="cancelId" value="<%= rv.get("id") %>">
+                <select name="extendHours" style="padding:4px 8px;font-size:12px;border:1.5px solid var(--line2);border-radius:6px;outline:none;background:var(--white);color:var(--txt);cursor:pointer;">
+                  <option value="">연장</option>
+                  <option value="1">1시간 연장</option>
+                  <option value="2">2시간 연장</option>
+                  <option value="4">4시간 연장</option>
+                  <option value="8">8시간 연장</option>
+                </select>
+              </form>
+              <%}else if("예약완료".equals(st)){%>
               <form method="post" action="/CAN/main_student.jsp" style="margin:0"
                     onsubmit="return confirm('예약을 취소하시겠습니까?')">
                 <input type="hidden" name="cancelId" value="<%= rv.get("id") %>">
-                <button type="submit" class="btn-danger"><i class="bi bi-x-circle"></i>취소</button>
+                <button type="submit" class="btn-danger" style="padding:4px 8px;font-size:12px"><i class="bi bi-x-circle"></i>취소</button>
               </form>
               <%}else{%><span style="font-size:12px;color:var(--txt3)">-</span><%}%>
             </td>

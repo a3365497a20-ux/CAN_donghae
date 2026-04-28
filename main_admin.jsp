@@ -12,8 +12,21 @@
     if("POST".equals(request.getMethod())){
         request.setCharacterEncoding("UTF-8");
         String act=request.getParameter("act");
+        // 예약 연장
+        if("extendReserve".equals(act)){
+            String rid=request.getParameter("reserveId");
+            String extendHours=request.getParameter("extendHours");
+            try{
+                int hours=Integer.parseInt(extendHours!=null?extendHours:"1");
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                Connection c=DriverManager.getConnection(DBURL,"root","1234");
+                PreparedStatement ps=c.prepareStatement("UPDATE reservations SET end_time=DATE_ADD(end_time,INTERVAL ? HOUR) WHERE reserve_id=?");
+                ps.setInt(1,hours);ps.setString(2,rid);int n=ps.executeUpdate();ps.close();c.close();
+                okMsg=n>0?"예약 #"+rid+" 이(가) "+hours+"시간 연장되었습니다":"해당 예약을 찾을 수 없습니다.";
+            }catch(Exception e){errMsg="연장 오류: "+e.getMessage();}
+        }
         // 예약 취소
-        if("cancelReserve".equals(act)){
+        else if("cancelReserve".equals(act)){
             String rid=request.getParameter("reserveId");
             try{
                 Class.forName("com.mysql.cj.jdbc.Driver");
@@ -65,6 +78,9 @@
     try{
         Class.forName("com.mysql.cj.jdbc.Driver");
         Connection conn=DriverManager.getConnection(DBURL,"root","1234");
+        // 시간이 지난 예약을 자동으로 "사용완료"로 변경
+        String updateSql="UPDATE reservations SET status='사용완료' WHERE status='예약완료' AND CONCAT(reserve_date,' ',end_time) < NOW()";
+        conn.createStatement().executeUpdate(updateSql);
         ResultSet rs;
         rs=conn.createStatement().executeQuery("SELECT COUNT(*) FROM assets");if(rs.next())tA=rs.getInt(1);rs.close();
         rs=conn.createStatement().executeQuery("SELECT COUNT(*) FROM asset_transfer");if(rs.next())tT=rs.getInt(1);rs.close();
@@ -163,11 +179,11 @@
     <div class="stat-icon si-teal"><i class="bi bi-arrow-left-right" style="color:var(--teal);font-size:20px"></i></div>
     <div><div class="stat-label">이관 이력</div><div class="stat-val sv-teal"><%= String.format("%,d",tT) %></div><div class="stat-sub">누적</div></div>
   </div>
-  <div class="stat-card">
+  <div class="stat-card" onclick="location.href='/CAN/disposal_admin.jsp'" style="cursor:pointer;">
     <div class="stat-icon si-purple"><i class="bi bi-trash" style="color:var(--purple);font-size:20px"></i></div>
     <div><div class="stat-label">폐기 처리</div><div class="stat-val sv-purple"><%= String.format("%,d",tD) %></div><div class="stat-sub">누적</div></div>
   </div>
-  <div class="stat-card">
+  <div class="stat-card" onclick="location.href='/CAN/reservations_admin.jsp'" style="cursor:pointer;">
     <div class="stat-icon si-amber"><i class="bi bi-calendar-check" style="color:var(--amber);font-size:20px"></i></div>
     <div><div class="stat-label">전체 예약</div><div class="stat-val sv-amber"><%= String.format("%,d",tR) %></div><div class="stat-sub">누적</div></div>
   </div>
@@ -203,13 +219,25 @@
             <td style="font-family:var(--mono);font-size:12px"><%= rv.get("date") %></td>
             <td style="font-family:var(--mono);font-size:12px"><%= rv.get("start") %>~<%= rv.get("end") %></td>
             <td><span class="<%= bc %>"><%= st %></span></td>
-            <td>
-              <%if("예약완료".equals(st)){%>
-              <form method="post" action="/CAN/main_admin.jsp" style="margin:0"
+            <td style="display:flex;gap:6px;flex-wrap:wrap;">
+              <%if("사용완료".equals(st)){%>
+              <form method="post" action="/CAN/main_admin.jsp" accept-charset="UTF-8" style="margin:0;display:contents" onchange="if(confirm('[관리자] 예약 #<%= rv.get("id") %>을(를) '+this.querySelector('select').value+' 연장하시겠습니까?')) this.submit(); else this.reset()">
+                <input type="hidden" name="act" value="extendReserve">
+                <input type="hidden" name="reserveId" value="<%= rv.get("id") %>">
+                <select name="extendHours" style="padding:4px 8px;font-size:12px;border:1.5px solid var(--line2);border-radius:6px;outline:none;background:var(--white);color:var(--txt);cursor:pointer;">
+                  <option value="">연장</option>
+                  <option value="1">1시간 연장</option>
+                  <option value="2">2시간 연장</option>
+                  <option value="4">4시간 연장</option>
+                  <option value="8">8시간 연장</option>
+                </select>
+              </form>
+              <%}else if("예약완료".equals(st)){%>
+              <form method="post" action="/CAN/main_admin.jsp" accept-charset="UTF-8" style="margin:0"
                     onsubmit="return confirm('[관리자] 예약 #<%= rv.get("id") %>을 취소하시겠습니까?')">
                 <input type="hidden" name="act" value="cancelReserve">
                 <input type="hidden" name="reserveId" value="<%= rv.get("id") %>">
-                <button type="submit" class="btn-danger"><i class="bi bi-x-circle"></i>취소</button>
+                <button type="submit" class="btn-danger" style="padding:4px 8px;font-size:12px"><i class="bi bi-x-circle"></i>취소</button>
               </form>
               <%}else{%><span style="font-size:12px;color:var(--txt3)">-</span><%}%>
             </td>

@@ -749,7 +749,7 @@ const paramFloor = '<%= esc(paramFloor) %>';
 /* ── 건물별 2D/3D 도면 데이터 ── */
 var floorMaps = {
   '1공학관': {
-    '2D': { html: '/CAN/floormaps/eng1.html' },
+    '2D': { html: '/CAN/floormaps/eng1.html', floors: ['1','2','3','4','5'] },
     '3D': { floors: ['1','2','3','4','5'], gallery: {
       '1': ['/CAN/images/3d/eng1-3d-1.png'],
       '2': ['/CAN/images/3d/eng1-3d-2.png'],
@@ -759,17 +759,17 @@ var floorMaps = {
     }}
   },
   '2공학관': {
-    '2D': { html: '/CAN/floormaps/eng2.html' },
+    '2D': { html: '/CAN/floormaps/eng2.html', floors: ['지하','1','2','3','4','5'] },
     '3D': { floors: ['지하','1','2','3','4','5'], gallery: { '지하':['/CAN/images/3d/eng2-b1.png'],'1':['/CAN/images/3d/eng2-1f.png'],'2':['/CAN/images/3d/eng2-2f.png'],'3':['/CAN/images/3d/eng2-3f.png'],'4':['/CAN/images/3d/eng2-4f.png'],'5':['/CAN/images/3d/eng2-5f.png'] } }
   },
   '대학본부': {
-    '2D': { html: '/CAN/floormaps/main.html' },
+    '2D': { html: '/CAN/floormaps/main.html', floors: ['지하','1','2','3','4','5'] },
     '3D': { floors: ['지하','1','2','3','4','5'], gallery: { '지하':['/CAN/images/3d/main-b1.png'],'1':['/CAN/images/3d/main-1f.png'],'2':['/CAN/images/3d/main-2f.png'],'3':['/CAN/images/3d/main-3f.png'],'4':['/CAN/images/3d/main-4f.png'],'5':['/CAN/images/3d/main-5f.png'] } }
   },
-  '산학협력관':  { '2D': { html: '/CAN/floormaps/collab.html'  }, '3D': null },
-  '산업협력학관': { '2D': { html: '/CAN/floormaps/collab.html'  }, '3D': null },
-  '1생활관':     { '2D': { html: '/CAN/floormaps/dorm1.html'   }, '3D': null },
-  '2생활관':     { '2D': { html: '/CAN/floormaps/dorm2.html'   }, '3D': null },
+  '산학협력관':  { '2D': { html: '/CAN/floormaps/collab.html', floors: ['1','2','3','4','5'] }, '3D': null },
+  '산업협력학관': { '2D': { html: '/CAN/floormaps/collab.html', floors: ['1','2','3','4','5'] }, '3D': null },
+  '1생활관':     { '2D': { html: '/CAN/floormaps/dorm1.html', floors: ['1','2','3','4','5'] }, '3D': null },
+  '2생활관':     { '2D': { html: '/CAN/floormaps/dorm2.html', floors: ['1','2','3','4','5'] }, '3D': null },
   '학생회관':    { '2D': { html: '/CAN/floormaps/student.html' },
                  '3D': { floors: ['1','2','3','4','5'], gallery: {
                    '1': ['/CAN/images/3d/stu-1.png'],
@@ -837,6 +837,8 @@ function renderFloorDiagram() {
     rCv.style.display = 'block';
     cCv.style.display = 'block';                              /* 학부생도 마커 표시 */
     cCv.style.pointerEvents = IS_ADMIN ? 'auto' : 'none';    /* 학부생은 클릭 차단 */
+    /* 2D 도면은 자체 iframe에서 층수 선택 - 탭은 표시 안 함 */
+    if (tabWrap) tabWrap.style.display = 'none';
     setTimeout(function(){ resizeCanvas(); drawRoomMarkers(); }, 300);
     return;
   }
@@ -860,6 +862,12 @@ function renderFloorDiagram() {
           b.classList.toggle('active', b.textContent === floorLabel(f));
         });
         showGallery(dimInfo.gallery[f]);
+        /* 자동선택 목적지 취소 및 경로 삭제 */
+        const destRoomSelect = document.getElementById('destRoomInput');
+        if (destRoomSelect) destRoomSelect.value = '';
+        stopPulse();
+        shownPoints = [];
+        redraw(); updateOverlay();
         setTimeout(function(){ resizeCanvas(); drawRoomMarkers(); }, 120);
       };
       tabRow.appendChild(btn);
@@ -870,7 +878,10 @@ function renderFloorDiagram() {
 
     showGallery(dimInfo.gallery[curFloor]);
     gallery.style.display = 'block';
-    setTimeout(resizeCanvas, 300);
+    setTimeout(function() {
+      resizeCanvas();
+      drawRoomMarkers();  /* 3D 도면에서 마커 그리기 */
+    }, 300);
   }
 }
 
@@ -925,8 +936,8 @@ let roomData = [
 let pinTargetId = '';
 let pinTargetName = '';
 let pinTargetFloor = '';
-const ROOM_MARKER_HIT_R = 18;
-const ROOM_MARKER_R     = 10;  /* 마커 원 반지름 */
+const ROOM_MARKER_HIT_R = 25;
+const ROOM_MARKER_R     = 15;  /* 마커 원 반지름 */
 
 /* ── 반짝임 애니메이션 ── */
 let pulseTimer = null;
@@ -1338,6 +1349,18 @@ function onDestRoomSelect(sel) {
     const routeNameInput = document.getElementById('routeNameInput');
     if (routeNameInput) routeNameInput.value = '입구 → ' + roomName;
     if (floor) switchFloor(floor);
+    /* 마커 반짝거리기 효과 */
+    setTimeout(function() {
+        /* roomData에서 해당 호실 찾기 */
+        var targetMarker = null;
+        for (var i = 0; i < roomData.length; i++) {
+            if (roomData[i].name === roomName) {
+                targetMarker = roomData[i];
+                break;
+            }
+        }
+        if (targetMarker && targetMarker.hasPos) startPulse();
+    }, 200);
 }
 
 async function saveFloorRoute() {
@@ -1522,19 +1545,53 @@ window.addEventListener('load', function() {
     initFloorDiagram();
     setTimeout(function() {
         resizeCanvas();
-        /* 학생: 자동 경로 + 마커 표시 */
-        if (!IS_ADMIN && AUTO_PTS) {
+        /* detail.jsp 자동선택 목적지: 경로 표시 + 호실 드롭다운 선택 */
+        console.log('=== Load event ===');
+        console.log('paramFloor:', paramFloor);
+        console.log('AUTO_PTS:', AUTO_PTS);
+        console.log('DEST_ROOM:', DEST_ROOM);
+        if (paramFloor && AUTO_PTS) {
+            console.log('Condition met, processing...');
             try {
                 shownPoints = JSON.parse(AUTO_PTS) || [];
                 redraw(); updateOverlay();
             } catch(e) {}
-        }
-        /* paramDestRoom이 있으면 자동으로 호실 선택 + 층 변경 */
-        if (!IS_ADMIN && paramFloor && document.getElementById('destRoomInput')) {
+            /* 드롭다운 자동 선택 및 마커 표시 */
             const destRoomSelect = document.getElementById('destRoomInput');
-            if (destRoomSelect && destRoomSelect.value) {
-                onDestRoomSelect(destRoomSelect);
+
+            if (destRoomSelect) {
+                /* 관리자 모드: 드롭다운이 있음 */
+                if (!destRoomSelect.value || destRoomSelect.value === '') {
+                    var destNum = DEST_ROOM.replace('호', '').trim();
+                    for (var i = 0; i < roomData.length; i++) {
+                        var roomNum = roomData[i].name.replace('호', '').trim();
+                        if (roomNum === destNum) {
+                            destRoomSelect.value = roomData[i].name;
+                            break;
+                        }
+                    }
+                }
+                if (destRoomSelect.value) {
+                    onDestRoomSelect(destRoomSelect);
+                }
+            } else {
+                /* 학생 모드: 드롭다운 없음 → 직접 highlightRoomId 설정 */
+                var destNum = DEST_ROOM.replace('호', '').trim();
+                for (var i = 0; i < roomData.length; i++) {
+                    var roomNum = roomData[i].name.replace('호', '').trim();
+                    if (roomNum === destNum) {
+                        highlightRoomId = roomData[i].id;
+                        console.log('✅ Set highlightRoomId:', highlightRoomId);
+                        break;
+                    }
+                }
             }
+
+            /* 마커 반짝거리기 직접 호출 */
+            setTimeout(function() {
+                console.log('✨ startPulse called');
+                startPulse();
+            }, 300);
         }
         /* 항상 마커 그리기 (학부생/관리자 모두) */
         drawRoomMarkers();

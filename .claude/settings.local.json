@@ -18,7 +18,10 @@
       "Bash(export CATALINA_HOME=\"/c/Program Files/Apache Software Foundation/Tomcat 9.0\")",
       "Bash('/c/Program Files/Apache Software Foundation/Tomcat 9.0/bin/shutdown.bat')",
       "Bash('/c/Program Files/Apache Software Foundation/Tomcat 9.0/bin/startup.bat')",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git push *)",
+      "Bash(export CATALINA_HOME=\"/c/Program Files/Apache Software Foundation\\\\Tomcat 9.0\")",
+      "Bash('/c/Program Files/Apache Software Foundation\\\\Tomcat 9.0/bin/startup.bat')"
     ]
   }
 }
