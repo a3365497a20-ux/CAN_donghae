@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="true" import="java.sql.*,java.util.*" %>
 <%  String loginUser=(String)session.getAttribute("loginUser"),loginName=(String)session.getAttribute("loginName"),loginRole=(String)session.getAttribute("loginRole");
-    if(loginUser==null){response.sendRedirect("/CampusNav/campuslogin.jsp");return;}
-    String assetNo=request.getParameter("id");if(assetNo==null||assetNo.trim().isEmpty()){response.sendRedirect("/CampusNav/search.jsp");return;}
+    if(loginUser==null){response.sendRedirect("/CAN/campuslogin.jsp");return;}
+    String assetNo=request.getParameter("id");if(assetNo==null||assetNo.trim().isEmpty()){response.sendRedirect("/CAN/search.jsp");return;}
     Map<String,String> asset=new LinkedHashMap<>();List<Map<String,String>> transfers=new ArrayList<>(),reserves=new ArrayList<>();String dbErr="";
     try{Class.forName("com.mysql.cj.jdbc.Driver");Connection conn=DriverManager.getConnection("jdbc:mysql://localhost:3306/campusnav?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true","root","1234");
     PreparedStatement ps=conn.prepareStatement("SELECT * FROM assets WHERE asset_no=?");ps.setString(1,assetNo);ResultSet rs=ps.executeQuery();
@@ -18,7 +18,7 @@
 <%! private String nvl(String s){return s==null?"":s;} %>
 <!DOCTYPE html><html lang="ko"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>ICT CampusNav — 자산 상세</title>
+<title>ICT CAN — 자산 상세</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700;9..40,800&family=DM+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -472,15 +472,16 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
 }
 
 </style>
+<link rel="stylesheet" href="/CAN/css/common.css">
 </head><body>
 <div class="topnav">
-  <a href="/CampusNav/main_<%= loginRole %>.jsp" class="logo"><span class="logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>ICT Campus<em>Nav</em></a>
+  <a href="/CAN/main_<%= loginRole %>.jsp" class="logo"><span class="logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>ICT <em>CAN</em></a>
   <div class="nav-right">
     <span style="font-family:var(--mono);font-size:13px;color:var(--txt2)"><i class="bi bi-person-circle me-1"></i><%= loginName %></span>
     <span class="role-chip"><%= "student".equals(loginRole)?"학부생":"assistant".equals(loginRole)?"조교":"professor".equals(loginRole)?"교수":"admin".equals(loginRole)?"관리자":"게스트" %></span>
-    <a href="/CampusNav/main_<%= loginRole %>.jsp" class="chip"><i class="bi bi-house me-1"></i>홈</a>
-    <a href="/CampusNav/search.jsp" class="chip"><i class="bi bi-search me-1"></i>검색</a>
-    <form action="/CampusNav/logout" method="post" style="margin:0"><button type="submit" class="chip"><i class="bi bi-box-arrow-right me-1"></i>로그아웃</button></form>
+    <a href="/CAN/main_<%= loginRole %>.jsp" class="chip"><i class="bi bi-house me-1"></i>홈</a>
+    <a href="/CAN/search.jsp" class="chip"><i class="bi bi-search me-1"></i>검색</a>
+    <form action="/CAN/logout" method="post" style="margin:0"><button type="submit" class="chip"><i class="bi bi-box-arrow-right me-1"></i>로그아웃</button></form>
   </div>
 </div>
 <div class="shell">
@@ -492,8 +493,8 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
   <div class="hero-desc"><i class="bi bi-geo-alt" style="color:var(--teal)"></i> <%= loc %> <%= dloc %></div>
   <div class="tag-row">
     <span class="tag"><b>상태</b></span><span class="<%= stBadge %>" style="margin-left:4px"><%= st.isEmpty()?"정보없음":st %></span>
-    <% if(!"guest".equals(loginRole)){%><a href="/CampusNav/reserve.jsp?id=<%= assetNo %>" class="btn-prim" style="padding:8px 18px;font-size:13px">예약하기</a><%}%>
-    <a href="/CampusNav/search.jsp" class="btn-ghost" style="padding:7px 16px;font-size:13px">목록으로</a>
+    <% if(!"guest".equals(loginRole)){%><a href="/CAN/reserve.jsp?id=<%= assetNo %>" class="btn-prim" style="padding:8px 18px;font-size:13px">예약하기</a><%}%>
+    <a href="/CAN/search.jsp" class="btn-ghost" style="padding:7px 16px;font-size:13px">목록으로</a>
   </div>
 </div></div>
 
@@ -527,51 +528,29 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
   <div class="info-row"><span class="info-key">비고</span><span class="info-val"><%= asset.getOrDefault("remark","-") %></span></div>
 
   <%
-    /* ── campus_entrances 좌표 매칭 ──────────────────────────── */
-    String assetLat = asset.getOrDefault("latitude","");
-    String assetLng = asset.getOrDefault("longitude","");
-    String matchedEntranceName = "";
-    if ((assetLat.isEmpty() || assetLng.isEmpty()) && !dloc.isEmpty()) {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            java.sql.Connection conn2 = java.sql.DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/campusnav?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true","root","1234");
-            java.sql.PreparedStatement ps2 = conn2.prepareStatement(
-                "SELECT entrance_name, latitude, longitude FROM campus_entrances " +
-                "WHERE is_active=1 AND (entrance_name=? OR entrance_name LIKE ? OR ? LIKE CONCAT('%',entrance_name,'%')) " +
-                "ORDER BY CASE WHEN entrance_name=? THEN 0 WHEN entrance_name LIKE ? THEN 1 ELSE 2 END LIMIT 1");
-            String likeVal = "%" + dloc + "%";
-            ps2.setString(1,dloc); ps2.setString(2,likeVal); ps2.setString(3,dloc);
-            ps2.setString(4,dloc); ps2.setString(5,likeVal);
-            java.sql.ResultSet rs2 = ps2.executeQuery();
-            if (rs2.next()) {
-                assetLat = rs2.getString("latitude")  != null ? rs2.getString("latitude")  : "";
-                assetLng = rs2.getString("longitude") != null ? rs2.getString("longitude") : "";
-                matchedEntranceName = rs2.getString("entrance_name") != null ? rs2.getString("entrance_name") : "";
-            }
-            rs2.close(); ps2.close(); conn2.close();
-        } catch(Exception _ex) {}
-    }
-    boolean hasCoord  = !assetLat.isEmpty() && !assetLng.isEmpty();
-    String  navName   = nm + (dloc.isEmpty() ? "" : " (" + dloc + ")");
-    String  navNameEnc = "";
-    try { navNameEnc = java.net.URLEncoder.encode(navName,"UTF-8"); } catch(Exception _e){}
+    String navBuilding    = loc;
+    String navRoom        = dloc;
+    String navRoomId      = asset.getOrDefault("room_id","");
+    String navBuildingEnc = "";
+    String navRoomEnc     = "";
+    String navRoomIdEnc   = "";
+    try {
+        navBuildingEnc = java.net.URLEncoder.encode(navBuilding, "UTF-8");
+        navRoomEnc     = java.net.URLEncoder.encode(navRoom,     "UTF-8");
+        navRoomIdEnc   = java.net.URLEncoder.encode(navRoomId,   "UTF-8");
+    } catch(Exception _e){}
+    boolean canNav = !navBuilding.isEmpty();
   %>
 
   <!-- ── 길 안내 버튼 영역 ──────────────────────────────────── -->
   <div class="nav-btn-area">
-    <% if (hasCoord) { %>
-      <% if (!matchedEntranceName.isEmpty()) { %>
-      <div class="nav-match-badge">
-        <i class="bi bi-link-45deg"></i>위치 DB 매칭: <strong><%= matchedEntranceName %></strong>
-      </div>
-      <% } %>
-      <a href="/CampusNav/navigationTest1.jsp?destLat=<%= assetLat %>&destLng=<%= assetLng %>&destName=<%= navNameEnc %>"
+    <% if (canNav) { %>
+      <a href="/CAN/navigationTest1.jsp?destBuilding=<%= navBuildingEnc %>&destName=<%= navRoomEnc %>&roomId=<%= navRoomIdEnc %>"
          class="btn-nav-full">
         <i class="bi bi-signpost-2-fill"></i>
         <div>
           <div class="btn-nav-label">길 안내 시작</div>
-          <div class="btn-nav-sub"><%= assetLat %>, <%= assetLng %></div>
+          <div class="btn-nav-sub"><%= navBuilding %><% if(!navRoom.isEmpty()){ %> · <%= navRoom %><% } %></div>
         </div>
         <i class="bi bi-chevron-right btn-nav-arrow"></i>
       </a>
@@ -580,9 +559,7 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
         <i class="bi bi-signpost-2" style="opacity:.4;"></i>
         <div>
           <div class="btn-nav-label" style="color:var(--txt3);">길 안내 불가</div>
-          <div class="btn-nav-sub">
-            <% if(!dloc.isEmpty()){ %>"<%= dloc %>"의 좌표를 찾을 수 없습니다<% }else{ %>위치 좌표 미등록<% } %>
-          </div>
+          <div class="btn-nav-sub">위치 정보가 없습니다</div>
         </div>
       </div>
     <% } %>
@@ -621,16 +598,16 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
   <% if(!rv.get("purpose").isEmpty()){%><span style="font-size:12px;color:var(--txt3)">— <%= rv.get("purpose") %></span><%}%>
 </div>
 <%}}%>
-<% if(!"guest".equals(loginRole)){%><div style="margin-top:14px"><a href="/CampusNav/reserve.jsp?id=<%= assetNo %>" class="btn-prim">예약하기</a></div><%}%>
+<% if(!"guest".equals(loginRole)){%><div style="margin-top:14px"><a href="/CAN/reserve.jsp?id=<%= assetNo %>" class="btn-prim">예약하기</a></div><%}%>
 </div></div>
 </div><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- ══ SITE FOOTER ══ -->
 <footer class="site-footer">
   <div class="footer-inner">
-    <a href="/CampusNav/campuslogin.jsp" class="footer-logo">
-      <span class="footer-logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>
-      ICT Campus<em>Nav</em>
+    <a href="/CAN/campuslogin.jsp" class="footer-logo">
+      <span class="footer-logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>
+      ICT <em>CAN</em>
     </a>
     <div class="footer-team">
       <strong>Made by AI 소프트웨어학과</strong><br>
@@ -639,7 +616,7 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
     <div class="footer-copy">
       ICT폴리텍대학<br>
       교내 자원 내비게이션 시스템<br>
-      Copyright &copy; 2026 ICT CampusNav. All rights reserved.
+      Copyright &copy; 2026 ICT CAN. All rights reserved.
     </div>
   </div>
 </footer>

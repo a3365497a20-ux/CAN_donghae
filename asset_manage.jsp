@@ -4,12 +4,12 @@
     String loginUser = (String)session.getAttribute("loginUser");
     String loginName = (String)session.getAttribute("loginName");
     String loginRole = (String)session.getAttribute("loginRole");
-    if(loginUser == null){ response.sendRedirect("/CampusNav/campuslogin.jsp"); return; }
+    if(loginUser == null){ response.sendRedirect("/CAN/campuslogin.jsp"); return; }
     boolean isAdmin = "admin".equals(loginRole);
     boolean isAssist= "assistant".equals(loginRole);
     boolean isProf  = "professor".equals(loginRole);
     if(!isAdmin && !isAssist && !isProf){
-        response.sendRedirect("/CampusNav/main_"+loginRole+".jsp"); return;
+        response.sendRedirect("/CAN/main_"+loginRole+".jsp"); return;
     }
 
     /* ── DB 연결 상수 ── */
@@ -183,7 +183,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ICT CampusNav — 자원 관리</title>
+<title>ICT CAN — 자원 관리</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700;9..40,800&family=DM+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -296,21 +296,22 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
 .footer-team strong{color:var(--blue);}
 .footer-copy{font-family:var(--mono);font-size:12px;color:var(--txt3);text-align:right;line-height:1.8;}
 </style>
+<link rel="stylesheet" href="/CAN/css/common.css">
 </head>
 <body>
 
 <!-- TOPNAV -->
 <div class="topnav">
-  <a href="/CampusNav/main_<%= loginRole %>.jsp" class="logo">
-    <span class="logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>
-    ICT Campus<em>Nav</em>
+  <a href="/CAN/main_<%= loginRole %>.jsp" class="logo">
+    <span class="logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>
+    ICT <em>CAN</em>
   </a>
   <div style="display:flex;gap:8px;align-items:center">
     <span style="font-family:var(--mono);font-size:13px;color:var(--txt2)"><i class="bi bi-person-circle"></i> <%= loginName %></span>
     <span class="role-chip"><%= isAdmin?"운영관리자":isAssist?"조교":"교수" %></span>
-    <a href="/CampusNav/main_<%= loginRole %>.jsp" class="chip"><i class="bi bi-house"></i> 홈</a>
-    <a href="/CampusNav/search.jsp" class="chip"><i class="bi bi-search"></i> 검색</a>
-    <form action="/CampusNav/logout" method="post" style="margin:0">
+    <a href="/CAN/main_<%= loginRole %>.jsp" class="chip"><i class="bi bi-house"></i> 홈</a>
+    <a href="/CAN/search.jsp" class="chip"><i class="bi bi-search"></i> 검색</a>
+    <form action="/CAN/logout" method="post" style="margin:0">
       <button type="submit" class="chip"><i class="bi bi-box-arrow-right"></i> 로그아웃</button>
     </form>
   </div>
@@ -321,7 +322,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
   <!-- HERO -->
   <div class="hero">
     <div class="hero-content">
-      <div class="hero-eyebrow">// ICT CampusNav · 자원 관리</div>
+      <div class="hero-eyebrow">// ICT CAN · 자원 관리</div>
       <div class="hero-title">자산 <em>등록 · 수정 · 삭제</em></div>
       <div class="hero-desc">DB에 직접 연동됩니다. 총 <strong><%= assetTotal %>건</strong> 검색됨.</div>
     </div>
@@ -348,7 +349,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
   <div class="tab-pane active" id="tab-list">
     <!-- 검색 -->
     <div style="margin-bottom:16px">
-      <form method="get" action="/CampusNav/asset_manage.jsp">
+      <form method="get" action="/CAN/asset_manage.jsp">
         <div class="search-bar">
           <input type="text" name="keyword" value="<%= keyword %>" placeholder="자산번호, 품목명, 위치, 관리부서 검색...">
           <select name="filterCls">
@@ -358,7 +359,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
             <option value="무형고정자산" <%= "무형고정자산".equals(filterCls)?"selected":"" %>>소프트웨어</option>
           </select>
           <button type="submit" class="btn-prim" style="padding:8px 18px;font-size:14px"><i class="bi bi-search"></i> 검색</button>
-          <a href="/CampusNav/asset_manage.jsp" class="btn-ghost" style="padding:7px 16px;font-size:14px">초기화</a>
+          <a href="/CAN/asset_manage.jsp" class="btn-ghost" style="padding:7px 16px;font-size:14px">초기화</a>
         </div>
       </form>
     </div>
@@ -424,7 +425,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
         <div><div class="ch-title">신규 자산 등록</div><div class="ch-sub">* 표시 항목은 필수입니다</div></div>
       </div>
       <div class="card-body">
-        <form method="post" action="/CampusNav/asset_manage.jsp" onsubmit="return validateInsert()">
+        <form method="post" action="/CAN/asset_manage.jsp" onsubmit="return validateInsert()">
           <input type="hidden" name="action" value="insert">
           <div class="row g-3">
             <div class="col-md-4">
@@ -519,7 +520,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
         <button class="btn-ghost ms-auto" onclick="showTab('list',null)"><i class="bi bi-x"></i> 닫기</button>
       </div>
       <div class="card-body">
-        <form method="post" action="/CampusNav/asset_manage.jsp" onsubmit="return confirm('DB에 수정 내용을 저장하시겠습니까?')">
+        <form method="post" action="/CAN/asset_manage.jsp" onsubmit="return confirm('DB에 수정 내용을 저장하시겠습니까?')">
           <input type="hidden" name="action" value="update">
           <div class="row g-3">
             <div class="col-md-4">
@@ -634,7 +635,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
           <i class="bi bi-info-circle-fill"></i>
           이 자산에 연결된 이관이력, 폐기이력도 함께 삭제됩니다 (CASCADE). 예약 기록은 별도 확인하세요.
         </div>
-        <form method="post" action="/CampusNav/asset_manage.jsp" onsubmit="return confirmDelete()">
+        <form method="post" action="/CAN/asset_manage.jsp" onsubmit="return confirmDelete()">
           <input type="hidden" name="action" value="delete">
           <input type="hidden" name="delNo" id="delNo">
           <div style="margin-bottom:16px">
@@ -655,9 +656,9 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
 <!-- FOOTER -->
 <footer class="site-footer">
   <div class="footer-inner">
-    <a href="/CampusNav/campuslogin.jsp" class="footer-logo">
-      <span class="footer-logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>
-      ICT Campus<em>Nav</em>
+    <a href="/CAN/campuslogin.jsp" class="footer-logo">
+      <span class="footer-logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>
+      ICT <em>CAN</em>
     </a>
     <div class="footer-team">
       <strong>Made by AI 소프트웨어학과</strong><br>
@@ -665,7 +666,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
     </div>
     <div class="footer-copy">
       ICT폴리텍대학 교내 자원 내비게이션 시스템<br>
-      Copyright &copy; 2026 ICT CampusNav. All rights reserved.
+      Copyright &copy; 2026 ICT CAN. All rights reserved.
     </div>
   </div>
 </footer>
@@ -739,10 +740,15 @@ function validateInsert() {
   return confirm('자산번호 [' + no + ']\n[' + name + ']\n\nDB에 등록하시겠습니까?');
 }
 
-/* ══ POST 성공 후 탭 자동 이동 ══ */
+/* ══ POST 성공 후 탭 자동 이동 / 새 자산 등록 탭 자동 선택 ══ */
 <% if(!msgOk.isEmpty()){ %>
 window.addEventListener('DOMContentLoaded', function(){
   showTab('list', document.querySelector('.tab-btn'));
+});
+<% } else if("new".equals(action)){ %>
+window.addEventListener('DOMContentLoaded', function(){
+  var insertBtn = document.querySelectorAll('.tab-btn')[1];
+  showTab('insert', insertBtn);
 });
 <% } %>
 </script>

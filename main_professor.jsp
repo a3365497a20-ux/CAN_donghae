@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="true" import="java.sql.*,java.util.*" %>
 <%
     String loginUser=(String)session.getAttribute("loginUser"),loginName=(String)session.getAttribute("loginName");
-    if(loginUser==null){response.sendRedirect("/CampusNav/campuslogin.jsp");return;}
+    if(loginUser==null){response.sendRedirect("/CAN/campuslogin.jsp");return;}
     List<String[]> swList=new ArrayList<>();int swTotal=0;
     try{Class.forName("com.mysql.cj.jdbc.Driver");
     Connection conn=DriverManager.getConnection("jdbc:mysql://localhost:3306/campusnav?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true","root","1234");
@@ -13,7 +13,7 @@
 <!DOCTYPE html>
 <html lang="ko"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ICT CampusNav — 교수</title>
+<title>ICT CAN — 교수</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800&family=DM+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
 /* ═══ TOKENS (ppd4) ═══ */
@@ -380,29 +380,30 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
 }
 
 </style>
+<link rel="stylesheet" href="/CAN/css/common.css">
 </head><body><div class="shell">
 <div class="topnav">
-  <a href="/CampusNav/main_professor.jsp" class="logo">
-    <span class="logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>
-    ICT Campus<em>Nav</em>
+  <a href="/CAN/main_professor.jsp" class="logo">
+    <span class="logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>
+    ICT <em>CAN</em>
   </a>
   <div class="nav-right">
     <span style="font-family:var(--mono);font-size:13px;color:var(--txt2)"><i class="bi bi-person-circle"></i> <%= loginName %></span>
     <span class="role-chip">교수</span>
-    <a href="/CampusNav/search.jsp" class="chip"><i class="bi bi-search"></i> 검색</a>
-    <a href="/CampusNav/professor.jsp" class="chip chip-blue"><i class="bi bi-people"></i> 교수 자원</a>
-    <a href="/CampusNav/asset_manage.jsp" class="chip" style="background:var(--blue);color:white;border-color:var(--blue)"><i class="bi bi-pencil-square"></i> 자원 관리</a>
-    <form action="/CampusNav/logout" method="post" style="margin:0"><button type="submit" class="chip"><i class="bi bi-box-arrow-right"></i> 로그아웃</button></form>
+    <a href="/CAN/search.jsp" class="chip"><i class="bi bi-search"></i> 검색</a>
+    <a href="/CAN/professor.jsp" class="chip chip-blue"><i class="bi bi-people"></i> 교수 자원</a>
+    <a href="/CAN/asset_manage.jsp" class="chip" style="background:var(--blue);color:white;border-color:var(--blue)"><i class="bi bi-pencil-square"></i> 자원 관리</a>
+    <form action="/CAN/logout" method="post" style="margin:0"><button type="submit" class="chip"><i class="bi bi-box-arrow-right"></i> 로그아웃</button></form>
   </div>
 </div>
 <div class="hero">
   <div class="hero-content">
-    <div class="hero-eyebrow">// ICT CampusNav · 교수</div>
+    <div class="hero-eyebrow">// ICT CAN · 교수</div>
     <div class="hero-title">안녕하세요, <span><%= loginName %></span>님 👨‍🏫</div>
     <div class="hero-desc">소프트웨어 자산 <strong><%= String.format("%,d",swTotal) %>건</strong> DB 실시간 연동. 교수 자원 관리 및 과목 등록이 가능합니다.</div>
     <div class="tag-row">
-      <a href="/CampusNav/professor.jsp" class="btn-prim" style="font-size:13px;padding:9px 18px"><i class="bi bi-people-fill me-1"></i>교수 자원 관리</a>
-      <a href="/CampusNav/search.jsp?type=무형고정자산" class="btn-ghost" style="font-size:13px;padding:8px 16px"><i class="bi bi-search me-1"></i>SW 전체 검색</a>
+      <a href="/CAN/professor.jsp" class="btn-prim" style="font-size:13px;padding:9px 18px"><i class="bi bi-people-fill me-1"></i>교수 자원 관리</a>
+      <a href="/CAN/search.jsp?type=무형고정자산" class="btn-ghost" style="font-size:13px;padding:8px 16px"><i class="bi bi-search me-1"></i>SW 전체 검색</a>
     </div>
   </div>
   <div class="hero-side"><div class="hero-illo">🎓</div></div>
@@ -410,8 +411,8 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
 <div class="stat-row">
   <div class="stat-card"><div class="stat-icon si-purple"><i class="bi bi-code-square" style="color:var(--purple);font-size:20px"></i></div><div><div class="stat-label">SW 자산 (DB)</div><div class="stat-val sv-purple"><%= String.format("%,d",swTotal) %></div><div class="stat-sub">무형고정자산</div></div></div>
   <div class="stat-card"><div class="stat-icon si-blue"><i class="bi bi-pc-display" style="color:var(--blue);font-size:20px"></i></div><div><div class="stat-label">현재 표시</div><div class="stat-val sv-blue"><%= swList.size() %></div><div class="stat-sub">최근 8건</div></div></div>
-  <div class="stat-card" onclick="location.href='/CampusNav/professor.jsp'" style="cursor:pointer"><div class="stat-icon si-teal"><i class="bi bi-people" style="color:var(--teal);font-size:20px"></i></div><div><div class="stat-label">교수 자원</div><div class="stat-val sv-teal" style="font-size:18px">관리 →</div><div class="stat-sub">과목·주특기</div></div></div>
-  <div class="stat-card" onclick="location.href='/CampusNav/search.jsp'" style="cursor:pointer"><div class="stat-icon si-amber"><i class="bi bi-search" style="color:var(--amber);font-size:20px"></i></div><div><div class="stat-label">전체 검색</div><div class="stat-val sv-amber" style="font-size:18px">검색 →</div><div class="stat-sub">모든 자산</div></div></div>
+  <div class="stat-card" onclick="location.href='/CAN/professor.jsp'" style="cursor:pointer"><div class="stat-icon si-teal"><i class="bi bi-people" style="color:var(--teal);font-size:20px"></i></div><div><div class="stat-label">교수 자원</div><div class="stat-val sv-teal" style="font-size:18px">관리 →</div><div class="stat-sub">과목·주특기</div></div></div>
+  <div class="stat-card" onclick="location.href='/CAN/search.jsp'" style="cursor:pointer"><div class="stat-icon si-amber"><i class="bi bi-search" style="color:var(--amber);font-size:20px"></i></div><div><div class="stat-label">전체 검색</div><div class="stat-val sv-amber" style="font-size:18px">검색 →</div><div class="stat-sub">모든 자산</div></div></div>
 </div>
 <div class="main-grid">
   <div class="left-col">
@@ -419,7 +420,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
       <div class="card-head">
         <div class="ch-icon si-purple"><i class="bi bi-code-square" style="color:var(--purple)"></i></div>
         <div><div class="ch-title">소프트웨어 현황 (DB)</div><div class="ch-sub">최근 8건 · 전체 <%= String.format("%,d",swTotal) %>건</div></div>
-        <div class="card-head-extra"><a href="/CampusNav/search.jsp?type=무형고정자산" class="btn-ghost" style="font-size:12px">전체 보기</a></div>
+        <div class="card-head-extra"><a href="/CAN/search.jsp?type=무형고정자산" class="btn-ghost" style="font-size:12px">전체 보기</a></div>
       </div>
       <% if(swList.isEmpty()){%>
       <div class="card-body" style="text-align:center;padding:40px;color:var(--txt3)"><i class="bi bi-inbox" style="font-size:32px;display:block;margin-bottom:10px;opacity:.3"></i>데이터 없음</div>
@@ -435,12 +436,12 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
         </tr></thead>
         <tbody>
         <% for(String[] sw:swList){String stCls=(sw[5]!=null&&sw[5].contains("사용중"))?"background:var(--red-lt);color:var(--red)":"background:var(--green-lt);color:var(--green)"; %>
-        <tr onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''" onclick="location.href='/CampusNav/detail.jsp?id=<%=sw[0]!=null?sw[0]:""%>'" style="border-bottom:1px solid var(--line);cursor:pointer">
+        <tr onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''" onclick="location.href='/CAN/detail.jsp?id=<%=sw[0]!=null?sw[0]:""%>'" style="border-bottom:1px solid var(--line);cursor:pointer">
           <td style="padding:12px 20px;font-family:var(--mono);font-size:12px;color:var(--txt3)"><%=sw[0]!=null?sw[0]:"-"%></td>
           <td style="padding:12px 16px;font-weight:700;font-size:15px"><%=sw[1]!=null?sw[1]:"-"%></td>
           <td style="padding:12px 16px;font-size:14px;color:var(--txt2)"><i class="bi bi-geo-alt" style="color:var(--teal)"></i> <%=sw[3]!=null?sw[3]:"-"%></td>
           <td style="padding:12px 16px"><span style="border-radius:6px;padding:3px 9px;font-size:12px;font-weight:600;font-family:var(--mono);<%=stCls%>"><%=sw[5]!=null&&!sw[5].isEmpty()?sw[5]:"정보없음"%></span></td>
-          <td style="padding:12px 16px" onclick="event.stopPropagation()"><a href="/CampusNav/detail.jsp?id=<%=sw[0]!=null?sw[0]:""%>" class="btn-ghost" style="font-size:12px;padding:6px 12px">상세</a></td>
+          <td style="padding:12px 16px" onclick="event.stopPropagation()"><a href="/CAN/detail.jsp?id=<%=sw[0]!=null?sw[0]:""%>" class="btn-ghost" style="font-size:12px;padding:6px 12px">상세</a></td>
         </tr>
         <%}%>
         </tbody>
@@ -464,7 +465,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
         <input type="text" id="navDest" class="map-search" placeholder="예) 공학관 301호, 이교수 연구실">
         <div class="map-btns">
           <a href="#" class="btn-nav-prim" onclick="goNav();return false;"><i class="bi bi-geo-alt-fill me-1"></i>현재 위치 길찾기</a>
-          <a href="/CampusNav/navigationTest1.jsp" class="btn-nav-ghost"><i class="bi bi-arrow-repeat me-1"></i>대체 경로 보기</a>
+          <a href="/CAN/navigationTest1.jsp" class="btn-nav-ghost"><i class="bi bi-arrow-repeat me-1"></i>대체 경로 보기</a>
         </div>
         <div id="navMsg" style="display:none;margin-top:10px;padding:10px 13px;background:var(--teal-lt);border:1px solid var(--teal-md);border-radius:var(--r);font-size:13px;color:var(--teal)"></div>
       </div>
@@ -476,10 +477,10 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
       </div>
       <div class="card-body">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <a href="/CampusNav/professor.jsp" class="btn-prim" style="text-align:center;padding:12px"><i class="bi bi-people-fill d-block mb-1" style="font-size:18px"></i>교수 자원</a>
-          <a href="/CampusNav/search.jsp" class="btn-ghost" style="text-align:center;padding:12px"><i class="bi bi-search d-block mb-1" style="font-size:18px"></i>자원 검색</a>
-          <a href="/CampusNav/reserve.jsp" class="btn-ghost" style="text-align:center;padding:12px"><i class="bi bi-calendar-check d-block mb-1" style="font-size:18px"></i>예약</a>
-          <a href="/CampusNav/detail.jsp" class="btn-ghost" style="text-align:center;padding:12px"><i class="bi bi-info-circle d-block mb-1" style="font-size:18px"></i>자산 상세</a>
+          <a href="/CAN/professor.jsp" class="btn-prim" style="text-align:center;padding:12px"><i class="bi bi-people-fill d-block mb-1" style="font-size:18px"></i>교수 자원</a>
+          <a href="/CAN/search.jsp" class="btn-ghost" style="text-align:center;padding:12px"><i class="bi bi-search d-block mb-1" style="font-size:18px"></i>자원 검색</a>
+          <a href="/CAN/reserve.jsp" class="btn-ghost" style="text-align:center;padding:12px"><i class="bi bi-calendar-check d-block mb-1" style="font-size:18px"></i>예약</a>
+          <a href="/CAN/detail.jsp" class="btn-ghost" style="text-align:center;padding:12px"><i class="bi bi-info-circle d-block mb-1" style="font-size:18px"></i>자산 상세</a>
         </div>
       </div>
     </div>
@@ -488,7 +489,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
 </div><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script><script>
 function goNav(){
   var dest=document.getElementById('navDest');if(!dest)return;
-  var d=dest.value.trim(),url='/CampusNav/navigationTest1.jsp';
+  var d=dest.value.trim(),url='/CAN/navigationTest1.jsp';
   if(d)url+='?destName='+encodeURIComponent(d);
   var msg=document.getElementById('navMsg');
   if(msg){msg.innerHTML='<i class="bi bi-compass me-1"></i>'+(d?'목적지: <strong>'+d+'</strong> — 경로 계산 중...':'현재 위치 탐색 중...')+'<br><small style="opacity:.75">GPS 설치 후 실시간 경로 표시</small>';msg.style.display='block';}
@@ -498,9 +499,9 @@ function goNav(){
 <!-- ══ SITE FOOTER ══ -->
 <footer class="site-footer">
   <div class="footer-inner">
-    <a href="/CampusNav/campuslogin.jsp" class="footer-logo">
-      <span class="footer-logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>
-      ICT Campus<em>Nav</em>
+    <a href="/CAN/campuslogin.jsp" class="footer-logo">
+      <span class="footer-logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>
+      ICT <em>CAN</em>
     </a>
     <div class="footer-team">
       <strong>Made by AI 소프트웨어학과</strong><br>
@@ -509,7 +510,7 @@ function goNav(){
     <div class="footer-copy">
       ICT폴리텍대학<br>
       교내 자원 내비게이션 시스템<br>
-      Copyright &copy; 2026 ICT CampusNav. All rights reserved.
+      Copyright &copy; 2026 ICT CAN. All rights reserved.
     </div>
   </div>
 </footer>

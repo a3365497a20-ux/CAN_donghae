@@ -56,7 +56,7 @@
                     ps.setString(7, role);
                     ps.executeUpdate();
                     ps.close(); conn.close();
-                    response.sendRedirect("/CampusNav/campuslogin.jsp?registered=true");
+                    response.sendRedirect("/CAN/campuslogin.jsp?registered=true");
                     return;
                 }
             } catch (Exception e) {
@@ -71,7 +71,7 @@
     }
 
     if (session.getAttribute("loginUser") != null) {
-        response.sendRedirect("/CampusNav/campuslogin.jsp");
+        response.sendRedirect("/CAN/campuslogin.jsp");
         return;
     }
     String errorMsg = (String) request.getAttribute("errorMsg");
@@ -82,7 +82,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICT CampusNav — 회원가입</title>
+    <title>ICT CAN — 회원가입</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700;9..40,800&family=DM+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -567,13 +567,14 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
 }
 
 </style>
+<link rel="stylesheet" href="/CAN/css/common.css">
 </head>
 <body>
 <div class="reg-wrap">
   <div class="reg-card">
 
-    <div class="reg-logo"><img src="/CampusNav/images/logo.png" alt="ICT"></div>
-    <div class="reg-title">ICT Campus<em>Nav</em> 가입</div>
+    <div class="reg-logo"><img src="/CAN/images/logo.png" alt="ICT"></div>
+    <div class="reg-title">ICT <em>CAN</em> 가입</div>
     <div class="reg-sub">재학생 · 교직원 전용 서비스</div>
 
     <!-- 에러 메시지 (기존 로직 유지) -->
@@ -615,7 +616,7 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
     <div class="alert-err"><i class="bi bi-exclamation-circle-fill"></i><span><%= errMsg %></span></div>
     <% } %>
 
-    <form action="/CampusNav/register.jsp" method="post" id="regForm">
+    <form action="/CAN/register.jsp" method="post" id="regForm">
       <input type="hidden" name="role" id="roleValue" value="student">
 
       <!-- 기본 정보 -->
@@ -697,7 +698,7 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
       </div>
 
       <button type="submit" class="btn-submit"><i class="bi bi-person-check me-1"></i>가입하기</button>
-      <a href="/CampusNav/campuslogin.jsp" class="btn-back"><i class="bi bi-arrow-left me-1"></i>로그인으로 돌아가기</a>
+      <a href="/CAN/campuslogin.jsp" class="btn-back"><i class="bi bi-arrow-left me-1"></i>로그인으로 돌아가기</a>
     </form>
 
     <p class="foot">재학생·교직원 전용 서비스 &nbsp;|&nbsp; <a href="mailto:support@campus.ac.kr">support@campus.ac.kr</a></p>
@@ -767,9 +768,9 @@ document.getElementById('regForm').addEventListener('submit', function(e) {
 
 <footer class="site-footer">
   <div class="footer-inner">
-    <a href="/CampusNav/campuslogin.jsp" class="footer-logo">
-      <span class="footer-logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>
-      ICT Campus<em>Nav</em>
+    <a href="/CAN/campuslogin.jsp" class="footer-logo">
+      <span class="footer-logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>
+      ICT <em>CAN</em>
     </a>
     <div class="footer-team">
       <strong>Made by AI 소프트웨어학과</strong><br>
@@ -777,7 +778,7 @@ document.getElementById('regForm').addEventListener('submit', function(e) {
     </div>
     <div class="footer-copy">
       ICT폴리텍대학 교내 자원 내비게이션 시스템<br>
-      Copyright &copy; 2026 ICT CampusNav. All rights reserved.
+      Copyright &copy; 2026 ICT CAN. All rights reserved.
     </div>
   </div>
 </footer>

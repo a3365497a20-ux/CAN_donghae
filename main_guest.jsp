@@ -1,14 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="true" %>
 <%
     String loginUser=(String)session.getAttribute("loginUser");
-    if(loginUser==null){response.sendRedirect("/CampusNav/campuslogin.jsp");return;}
+    if(loginUser==null){response.sendRedirect("/CAN/campuslogin.jsp");return;}
 %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ICT CampusNav — 게스트</title>
+<title>ICT CAN — 게스트</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700;9..40,800&family=DM+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -117,17 +117,18 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
 @media(max-width:1100px){.main-grid{grid-template-columns:1fr;}.cat-grid{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:768px){.topnav{padding:12px 16px;}.shell{padding:16px 16px 48px;}.hero{grid-template-columns:1fr;padding:26px 22px;}.hero::after{display:none;}.hero-side{display:none;}.cat-grid{grid-template-columns:repeat(3,1fr);}}
 </style>
+<link rel="stylesheet" href="/CAN/css/common.css">
 </head>
 <body>
 
 <nav class="topnav">
-  <a href="/CampusNav/main_guest.jsp" class="logo">
-    <span class="logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>
-    ICT Campus<em>Nav</em>
+  <a href="/CAN/main_guest.jsp" class="logo">
+    <span class="logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>
+    ICT <em>CAN</em>
   </a>
   <div class="nav-right">
     <span class="role-chip">게스트</span>
-    <a href="/CampusNav/guest_to_login.jsp" class="chip chip-blue">
+    <a href="/CAN/guest_to_login.jsp" class="chip chip-blue">
       <i class="bi bi-box-arrow-in-right"></i> 로그인
     </a>
   </div>
@@ -140,7 +141,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
       <div class="hero-eyebrow">// ICT CAMPUSNAV · 게스트 모드</div>
       <div class="hero-title">교내 자원을 <em>검색</em>하세요</div>
       <div class="hero-desc">로그인 없이 자산 검색 및 상세보기가 가능합니다.<br>예약 및 길안내는 로그인 후 이용하세요.</div>
-      <form method="get" action="/CampusNav/search.jsp" style="position:relative;z-index:2">
+      <form method="get" action="/CAN/search.jsp" style="position:relative;z-index:2">
         <div class="search-wrap">
           <input type="text" name="keyword" placeholder="자산번호, 품목명, 위치 검색...">
           <button type="submit" class="btn-search"><i class="bi bi-search me-1"></i>검색</button>
@@ -159,22 +160,22 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
         </div>
         <div class="card-body">
           <div class="cat-grid">
-            <a href="/CampusNav/search.jsp?type=공기구비품" class="cat-item">
+            <a href="/CAN/search.jsp?type=공기구비품" class="cat-item">
               <i class="bi bi-tools" style="color:var(--blue)"></i><span>공기구비품</span>
             </a>
-            <a href="/CampusNav/search.jsp?type=집기비품" class="cat-item">
+            <a href="/CAN/search.jsp?type=집기비품" class="cat-item">
               <i class="bi bi-laptop" style="color:var(--teal)"></i><span>집기비품</span>
             </a>
-            <a href="/CampusNav/search.jsp?type=무형고정자산" class="cat-item">
+            <a href="/CAN/search.jsp?type=무형고정자산" class="cat-item">
               <i class="bi bi-code-square" style="color:var(--purple)"></i><span>소프트웨어</span>
             </a>
-            <a href="/CampusNav/search.jsp?keyword=공학관" class="cat-item">
+            <a href="/CAN/search.jsp?keyword=공학관" class="cat-item">
               <i class="bi bi-building" style="color:var(--amber)"></i><span>공학관</span>
             </a>
-            <a href="/CampusNav/professor.jsp" class="cat-item">
+            <a href="/CAN/professor.jsp" class="cat-item">
               <i class="bi bi-people" style="color:var(--teal)"></i><span>교수 자원</span>
             </a>
-            <a href="/CampusNav/search.jsp" class="cat-item">
+            <a href="/CAN/search.jsp" class="cat-item">
               <i class="bi bi-grid" style="color:var(--txt3)"></i><span>전체보기</span>
             </a>
           </div>
@@ -187,7 +188,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
           <div style="font-weight:700;font-size:15px;color:var(--amber);margin-bottom:4px">게스트 이용 안내</div>
           <div style="font-size:14px;color:var(--txt2)">
             게스트는 <strong>검색·상세보기</strong>만 가능합니다.
-            <a href="/CampusNav/guest_to_login.jsp" style="color:var(--blue);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-left:6px">
+            <a href="/CAN/guest_to_login.jsp" style="color:var(--blue);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-left:6px">
               <i class="bi bi-box-arrow-in-right"></i>로그인하여 예약 및 길찾기 →
             </a>
           </div>
@@ -208,35 +209,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
             <div class="map-note">로그인 후 현재 위치 기준<br>실내 경로 안내를 이용할 수 있습니다</div>
           </div>
           <!-- 로그인하여 길찾기 버튼 -->
-          <a href="/CampusNav/guest_to_login.jsp" class="btn-login-teal">
-            <i class="bi bi-box-arrow-in-right me-1"></i>로그인하여 길찾기
-          </a>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head">
-          <div class="ch-icon si-blue"><i class="bi bi-person-circle" style="color:var(--blue)"></i></div>
-          <div><div class="ch-title">더 많은 기능 이용하기</div><div class="ch-sub">로그인하면 모든 기능 사용 가능</div></div>
-        </div>
-        <div class="card-body">
-          <ul style="list-style:none;padding:0;margin:0 0 18px">
-            <li style="padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;display:flex;align-items:center;gap:8px"><i class="bi bi-check-circle-fill" style="color:var(--green)"></i>자원 예약 신청</li>
-            <li style="padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;display:flex;align-items:center;gap:8px"><i class="bi bi-check-circle-fill" style="color:var(--green)"></i>실내 네비게이션 (GPS 연동)</li>
-            <li style="padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;display:flex;align-items:center;gap:8px"><i class="bi bi-check-circle-fill" style="color:var(--green)"></i>교수 자원 협력 요청</li>
-            <li style="padding:8px 0;font-size:14px;display:flex;align-items:center;gap:8px"><i class="bi bi-check-circle-fill" style="color:var(--green)"></i>자원 상세 정보 및 이관이력</li>
-          </ul>
-          <!-- 재학생 로그인 버튼 -->
-          <a href="/CampusNav/guest_to_login.jsp" class="btn-login-blue">
-            <i class="bi bi-box-arrow-in-right me-1"></i>재학생·교직원 로그인
-          </a>
-          <!-- 외부인 입장 버튼 -->
-          <a href="/CampusNav/visitor" class="btn-login-teal">
-            <i class="bi bi-person-walking me-1"></i>외부인 입장 (예약·길찾기)
-          </a>
-          <a href="/CampusNav/register.jsp" style="display:block;text-align:center;margin-top:10px;font-size:13px;color:var(--blue);text-decoration:none;font-weight:600">
-            <i class="bi bi-person-plus me-1"></i>회원가입
-          </a>
+          
         </div>
       </div>
     </div>
@@ -246,9 +219,9 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
 
 <footer class="site-footer">
   <div class="footer-inner">
-    <a href="/CampusNav/guest_to_login.jsp" class="footer-logo">
-      <span class="footer-logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>
-      ICT Campus<em>Nav</em>
+    <a href="/CAN/guest_to_login.jsp" class="footer-logo">
+      <span class="footer-logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>
+      ICT <em>CAN</em>
     </a>
     <div class="footer-team">
       <strong>Made by AI 소프트웨어학과</strong><br>
@@ -256,7 +229,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
     </div>
     <div class="footer-copy">
       ICT폴리텍대학 교내 자원 내비게이션 시스템<br>
-      Copyright &copy; 2026 ICT CampusNav. All rights reserved.
+      Copyright &copy; 2026 ICT CAN. All rights reserved.
     </div>
   </div>
 </footer>

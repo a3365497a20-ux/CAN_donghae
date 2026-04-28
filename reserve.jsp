@@ -1,19 +1,19 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="true" import="java.sql.*,java.util.*" %>
 <%  String loginUser=(String)session.getAttribute("loginUser"),loginName=(String)session.getAttribute("loginName"),loginRole=(String)session.getAttribute("loginRole");
-    if(loginUser==null){response.sendRedirect("/CampusNav/campuslogin.jsp");return;}
-    if("guest".equals(loginRole)){response.sendRedirect("/CampusNav/main_guest.jsp");return;}
+    if(loginUser==null){response.sendRedirect("/CAN/campuslogin.jsp");return;}
+    if("guest".equals(loginRole)){response.sendRedirect("/CAN/main_guest.jsp");return;}
     // visitor는 main_visitor.jsp에서 자체 예약폼 사용
     String assetNo=request.getParameter("id");if(assetNo==null)assetNo="";
     String success=request.getParameter("success");if(success==null)success="";
     String errMsg=request.getParameter("err");if(errMsg==null)errMsg="";
     if("POST".equals(request.getMethod())){
         String rNo=request.getParameter("resourceId"),rDate=request.getParameter("date"),rStart=request.getParameter("startTime"),rEnd=request.getParameter("endTime"),purpose=request.getParameter("purpose"),phone=request.getParameter("phone");
-        if(rNo!=null&&rDate!=null&&rStart!=null&&rEnd!=null&&!rDate.isEmpty()){
+        if(rNo!=null&&!rNo.isEmpty()&&rDate!=null&&rStart!=null&&rEnd!=null&&!rDate.isEmpty()){
             try{Class.forName("com.mysql.cj.jdbc.Driver");Connection conn=DriverManager.getConnection("jdbc:mysql://localhost:3306/campusnav?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true","root","1234");
             PreparedStatement ps=conn.prepareStatement("SELECT COUNT(*) FROM reservations WHERE asset_no=? AND reserve_date=? AND status='예약완료' AND start_time<? AND end_time>?");ps.setString(1,rNo);ps.setString(2,rDate);ps.setString(3,rEnd);ps.setString(4,rStart);ResultSet rs=ps.executeQuery();boolean dup=rs.next()&&rs.getInt(1)>0;rs.close();ps.close();
-            if(dup){response.sendRedirect("/CampusNav/reserve.jsp?id="+rNo+"&err=이미+예약된+시간입니다");}
-            else{ps=conn.prepareStatement("INSERT INTO reservations(asset_no,user_id,reserve_date,start_time,end_time,purpose,phone,status) VALUES(?,?,?,?,?,?,?,'예약완료')");ps.setString(1,rNo);ps.setString(2,loginUser);ps.setString(3,rDate);ps.setString(4,rStart);ps.setString(5,rEnd);ps.setString(6,purpose!=null?purpose:"");ps.setString(7,phone!=null?phone:"");ps.executeUpdate();ps.close();response.sendRedirect("/CampusNav/reserve.jsp?id="+rNo+"&success=true");}
-            conn.close();}catch(Exception e){response.sendRedirect("/CampusNav/reserve.jsp?id="+assetNo+"&err="+java.net.URLEncoder.encode(e.getMessage(),"UTF-8"));}return;}
+            if(dup){response.sendRedirect("/CAN/reserve.jsp?id="+rNo+"&err=이미+예약된+시간입니다");}
+            else{ps=conn.prepareStatement("INSERT INTO reservations(asset_no,user_id,reserve_date,start_time,end_time,purpose,phone,status) VALUES(?,?,?,?,?,?,?,'예약완료')");ps.setString(1,rNo);ps.setString(2,loginUser);ps.setString(3,rDate);ps.setString(4,rStart);ps.setString(5,rEnd);ps.setString(6,purpose!=null?purpose:"");ps.setString(7,phone!=null?phone:"");ps.executeUpdate();ps.close();response.sendRedirect("/CAN/reserve.jsp?id="+rNo+"&success=true");}
+            conn.close();}catch(Exception e){response.sendRedirect("/CAN/reserve.jsp?id="+assetNo+"&err="+java.net.URLEncoder.encode(e.getMessage(),"UTF-8"));}return;}
     }
     Map<String,String> assetInfo=new LinkedHashMap<>();List<Map<String,String>> existReserves=new ArrayList<>();
     if(!assetNo.isEmpty()){try{Class.forName("com.mysql.cj.jdbc.Driver");Connection conn=DriverManager.getConnection("jdbc:mysql://localhost:3306/campusnav?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true","root","1234");
@@ -23,7 +23,7 @@
 %>
 <!DOCTYPE html><html lang="ko"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>ICT CampusNav — 예약</title>
+<title>ICT CAN — 예약</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700;9..40,800&family=DM+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -450,19 +450,20 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
 }
 
 </style>
+<link rel="stylesheet" href="/CAN/css/common.css">
 </head><body>
 <div class="topnav">
-  <a href="/CampusNav/main_<%= loginRole %>.jsp" class="logo"><span class="logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>ICT Campus<em>Nav</em></a>
+  <a href="/CAN/main_<%= loginRole %>.jsp" class="logo"><span class="logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>ICT <em>CAN</em></a>
   <div class="nav-right">
     <span style="font-family:var(--mono);font-size:13px;color:var(--txt2)"><i class="bi bi-person-circle me-1"></i><%= loginName %></span>
     <span class="role-chip"><%= "student".equals(loginRole)?"학부생":"assistant".equals(loginRole)?"조교":"professor".equals(loginRole)?"교수":"관리자" %></span>
-    <a href="/CampusNav/main_<%= loginRole %>.jsp" class="chip"><i class="bi bi-house me-1"></i>홈</a>
-    <form action="/CampusNav/logout" method="post" style="margin:0"><button type="submit" class="chip"><i class="bi bi-box-arrow-right me-1"></i>로그아웃</button></form>
+    <a href="/CAN/main_<%= loginRole %>.jsp" class="chip"><i class="bi bi-house me-1"></i>홈</a>
+    <form action="/CAN/logout" method="post" style="margin:0"><button type="submit" class="chip"><i class="bi bi-box-arrow-right me-1"></i>로그아웃</button></form>
   </div>
 </div>
 <div class="shell">
 <div class="hero"><div class="hero-content">
-  <div class="hero-eyebrow">ICT CampusNav · 자원 예약</div>
+  <div class="hero-eyebrow">ICT CAN · 자원 예약</div>
   <div class="hero-title"><% if(!assetInfo.isEmpty()){%><em><%= assetInfo.get("name") %></em> 예약<%}else{%>자원 <em>예약</em><%}%></div>
   <% if(!assetInfo.isEmpty()){%><div class="hero-desc"><i class="bi bi-geo-alt" style="color:var(--teal)"></i> <%= assetInfo.get("loc") %></div><%}%>
 </div><div class="hero-side"><div class="hero-illo">📅</div></div></div>
@@ -474,13 +475,23 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
 <div class="col-lg-7">
 <div class="card"><div class="card-head"><div class="ch-icon si-blue">📝</div><div><div class="ch-title">예약 정보 입력</div></div></div>
 <div class="card-body">
-<form method="post" action="/CampusNav/reserve.jsp" onsubmit="return checkBefore()">
-  <input type="hidden" name="resourceId" value="<%= assetNo %>">
-  <div style="margin-bottom:16px"><label class="f-label">자산번호</label>
+<form method="post" action="/CAN/reserve.jsp" onsubmit="return checkBefore()">
+  <div style="margin-bottom:16px"><label class="f-label">자산 검색</label>
     <% if(assetNo.isEmpty()){ %>
-    <input class="f-input" type="text" name="resourceId" value="직접입력">
+    <div style="position:relative;display:flex;gap:8px">
+      <input class="f-input" type="text" id="assetSearch" placeholder="자산명 입력 (예: 노트북, 프로젝터)" autocomplete="off" style="flex:1">
+      <button type="button" class="btn-ghost" id="searchBtn" style="padding:8px 16px;margin-top:0;white-space:nowrap"><i class="bi bi-search"></i>검색</button>
+      <div id="searchResults" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--white);border:1px solid var(--line);border-radius:var(--r);max-height:300px;overflow-y:auto;z-index:100;box-shadow:var(--shadow2)"></div>
+    </div>
     <% }else{ %>
-    <input class="f-input" type="text" value="<%= assetNo %>" readonly style="background:var(--bg);color:var(--txt3)">
+    <input type="hidden" name="resourceId" value="<%= assetNo %>">
+    <div style="display:flex;gap:8px;align-items:center;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r)">
+      <div style="flex:1">
+        <div style="font-weight:700;color:var(--txt);font-size:14px"><%= assetInfo.isEmpty()?"":assetInfo.get("name") %></div>
+        <div style="font-size:12px;color:var(--txt3);font-family:var(--mono)"><%= assetNo %></div>
+      </div>
+      <a href="/CAN/reserve.jsp" class="btn-ghost" style="padding:8px 16px;margin-top:0;white-space:nowrap"><i class="bi bi-plus"></i>다른자산</a>
+    </div>
     <% } %>
   </div>
   <div style="margin-bottom:16px"><label class="f-label">예약 날짜 *</label>
@@ -498,39 +509,126 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
 </div></div></div>
 
 <div class="col-lg-5">
-<div class="card"><div class="card-head"><div class="ch-icon si-amber">🕐</div><div><div class="ch-title">기존 예약 현황</div><div class="ch-sub"><%= existReserves.size() %>건 예약 중</div></div></div>
-<div class="card-body">
-<% if(existReserves.isEmpty()){%>
-<div style="text-align:center;padding:24px;color:var(--txt3)"><i class="bi bi-check-circle" style="font-size:28px;display:block;margin-bottom:8px;color:var(--green);opacity:.6"></i><div style="font-size:14px">예약 내역이 없습니다.<br>이 시간에 예약 가능합니다!</div></div>
-<%}else{for(Map<String,String> rv:existReserves){%>
-<div style="border:1px solid #fca5a5;border-radius:var(--r);padding:10px 14px;margin-bottom:8px;background:var(--red-lt)">
-  <div style="font-weight:700;color:var(--red);font-size:13px"><i class="bi bi-x-circle me-1"></i><%= rv.get("date") %></div>
-  <div style="font-size:14px;font-weight:600"><%= rv.get("start") %> ~ <%= rv.get("end") %></div>
-  <div style="font-size:12px;color:var(--txt3)">예약자: <%= rv.get("user") %></div>
+  <% if(!assetNo.isEmpty() && !assetInfo.isEmpty()){ %>
+  <div class="card">
+    <div class="card-head">
+      <div class="ch-icon si-teal">📦</div>
+      <div><div class="ch-title">자산 정보</div></div>
+    </div>
+    <div class="card-body">
+      <div style="background:var(--bg);border-radius:var(--r);padding:16px;margin-bottom:16px">
+        <div style="font-size:12px;color:var(--txt3);margin-bottom:6px">자산명</div>
+        <div style="font-size:16px;font-weight:700;color:var(--txt);margin-bottom:12px"><%= assetInfo.get("name") %></div>
+
+        <div style="font-size:12px;color:var(--txt3);margin-bottom:6px">위치</div>
+        <div style="font-size:14px;color:var(--txt2);margin-bottom:12px"><i class="bi bi-geo-alt me-1" style="color:var(--teal)"></i><%= assetInfo.get("loc") %></div>
+
+        <div style="font-size:12px;color:var(--txt3);margin-bottom:6px">상태</div>
+        <div style="font-size:14px;color:var(--txt2)">
+          <span style="display:inline-block;padding:4px 10px;border-radius:6px;<%
+            String status = assetInfo.get("st");
+            if("정상".equals(status) || "사용가능".equals(status)){
+              out.print("background:var(--green-lt);color:var(--green)");
+            } else if("고장".equals(status)){
+              out.print("background:var(--red-lt);color:var(--red)");
+            } else {
+              out.print("background:var(--bg2);color:var(--txt3)");
+            }
+          %>"><%= status != null ? status : "-" %></span>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--txt3);text-align:center">위 정보 확인 후 예약 날짜와 시간을 선택하세요</p>
+    </div>
+  </div>
+  <% } else if(!assetNo.isEmpty()){ %>
+  <div class="card">
+    <div class="card-head">
+      <div class="ch-icon si-amber">⚠️</div>
+      <div><div class="ch-title">자산을 찾을 수 없습니다</div></div>
+    </div>
+    <div class="card-body" style="text-align:center;padding:32px;color:var(--txt3)">
+      <i class="bi bi-exclamation-circle" style="font-size:32px;display:block;margin-bottom:10px"></i>
+      자산번호 <strong style="color:var(--txt2)"><%= assetNo %></strong>를 찾을 수 없습니다.<br>
+      자산번호를 다시 확인하세요.
+    </div>
+  </div>
+  <% } else { %>
+  <div class="card">
+    <div class="card-head">
+      <div class="ch-icon si-blue">📋</div>
+      <div><div class="ch-title">자산 정보</div></div>
+    </div>
+    <div class="card-body" style="text-align:center;padding:32px;color:var(--txt3)">
+      <i class="bi bi-info-circle" style="font-size:32px;display:block;margin-bottom:10px"></i>
+      왼쪽에 자산번호를 입력하고<br>
+      조회 버튼을 클릭하세요
+    </div>
+  </div>
+  <% } %>
 </div>
-<%}}%>
-</div></div>
-</div></div>
+
+</div>
 </div>
 <script>
-var er=[<% for(int i=0;i<existReserves.size();i++){Map<String,String> rv=existReserves.get(i); %>{date:"<%= rv.get("date") %>",start:"<%= rv.get("start") %>",end:"<%= rv.get("end") %>"}<%=i<existReserves.size()-1?",":"" %><%}%>];
+var assetSearchTimeout;
+function performSearch(){
+  var searchInput=document.getElementById('assetSearch');
+  if(!searchInput) return;
+  var keyword=searchInput.value.trim();
+  var resultsDiv=document.getElementById('searchResults');
+  if(keyword.length<2){alert('2글자 이상 입력하세요');return;}
+  fetch('/CAN/searchAssets.jsp?keyword='+encodeURIComponent(keyword))
+    .then(function(r){return r.json()})
+    .then(function(data){
+      if(!data||data.length===0){resultsDiv.innerHTML='<div style="padding:12px;text-align:center;color:var(--txt3)">검색 결과 없음</div>';resultsDiv.style.display='block';return;}
+      var html='';
+      data.forEach(function(item){
+        if(item.error) return;
+        var status=item.status||'-';
+        var statusColor=status==='정상'||status==='사용가능'?'var(--green)':status==='고장'?'var(--red)':'var(--txt3)';
+        html+='<div style="padding:12px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .2s" onmouseover="this.style.background=\'var(--bg)\'" onmouseout="this.style.background=\'transparent\'" onclick="selectAsset(\''+item.assetNo.replace(/'/g,"\\'")+'\')">';
+        html+='<div style="font-weight:700;color:var(--txt);font-size:14px">'+item.itemName+'</div>';
+        html+='<div style="font-size:12px;color:var(--txt3);margin-top:4px"><i class="bi bi-geo-alt me-1"></i>'+(item.location||'-')+'</div>';
+        html+='<div style="font-size:11px;color:'+statusColor+';margin-top:4px;font-family:var(--mono)">'+item.assetNo+' · '+status+'</div>';
+        html+='</div>';
+      });
+      resultsDiv.innerHTML=html;
+      resultsDiv.style.display='block';
+    })
+    .catch(function(e){console.error('검색 오류:',e);resultsDiv.innerHTML='<div style="padding:12px;text-align:center;color:var(--red)">검색 중 오류 발생</div>';resultsDiv.style.display='block';});
+}
+document.addEventListener('DOMContentLoaded',function(){
+  var searchInput=document.getElementById('assetSearch');
+  var searchBtn=document.getElementById('searchBtn');
+  if(!searchInput) return;
+  searchInput.addEventListener('keyup',function(e){
+    clearTimeout(assetSearchTimeout);
+    if(e.key==='Enter'){performSearch();return;}
+    var keyword=this.value.trim();
+    var resultsDiv=document.getElementById('searchResults');
+    if(keyword.length<2){resultsDiv.style.display='none';return;}
+    assetSearchTimeout=setTimeout(performSearch,300);
+  });
+  if(searchBtn){
+    searchBtn.addEventListener('click',function(e){e.preventDefault();performSearch();});
+  }
+});
+function selectAsset(assetNo){location.href='/CAN/reserve.jsp?id='+encodeURIComponent(assetNo);}
 function checkTime(){
-  var date=document.getElementById('rDate').value,start=document.getElementById('rStart').value,end=document.getElementById('rEnd').value,el=document.getElementById('timeCheck');
-  if(!date||!start||!end){el.style.display='none';return;}
+  var start=document.getElementById('rStart').value,end=document.getElementById('rEnd').value,el=document.getElementById('timeCheck');
+  if(!start||!end){el.style.display='none';return;}
   if(start>=end){el.className='time-check time-err';el.innerHTML='<i class="bi bi-x-circle-fill me-1"></i>종료 시간이 시작 시간보다 빠릅니다.';el.style.display='block';return;}
-  var c=null;for(var r of er){if(r.date===date&&start<r.end&&end>r.start){c=r;break;}}
-  if(c){el.className='time-check time-err';el.innerHTML='<i class="bi bi-x-circle-fill me-1"></i><strong>예약 불가!</strong> '+c.start+'~'+c.end+' 이미 예약되어 있습니다.';}
-  else{el.className='time-check time-ok';el.innerHTML='<i class="bi bi-check-circle-fill me-1"></i><strong>예약 가능!</strong> 선택하신 시간에 예약할 수 있습니다.';}
-  el.style.display='block';
+  el.className='time-check time-ok';el.innerHTML='<i class="bi bi-check-circle-fill me-1"></i><strong>예약 가능!</strong> 선택하신 시간에 예약할 수 있습니다.';el.style.display='block';
 }
 function checkBefore(){var el=document.getElementById('timeCheck');if(el&&el.classList.contains('time-err')){alert('예약 불가능한 시간입니다.');return false;}return true;}
+document.addEventListener('click',function(e){var resultsDiv=document.getElementById('searchResults');if(resultsDiv&&!e.target.closest('#assetSearch')&&!e.target.closest('#searchResults')){resultsDiv.style.display='none';}});
 </script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <!-- ══ SITE FOOTER ══ -->
 <footer class="site-footer">
   <div class="footer-inner">
-    <a href="/CampusNav/campuslogin.jsp" class="footer-logo">
-      <span class="footer-logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>
-      ICT Campus<em>Nav</em>
+    <a href="/CAN/campuslogin.jsp" class="footer-logo">
+      <span class="footer-logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>
+      ICT <em>CAN</em>
     </a>
     <div class="footer-team">
       <strong>Made by AI 소프트웨어학과</strong><br>
@@ -539,7 +637,7 @@ function checkBefore(){var el=document.getElementById('timeCheck');if(el&&el.cla
     <div class="footer-copy">
       ICT폴리텍대학<br>
       교내 자원 내비게이션 시스템<br>
-      Copyright &copy; 2026 ICT CampusNav. All rights reserved.
+      Copyright &copy; 2026 ICT CAN. All rights reserved.
     </div>
   </div>
 </footer>

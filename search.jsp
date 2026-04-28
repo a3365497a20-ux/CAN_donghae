@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" session="true" import="java.sql.*,java.util.*" %>
 <%  String loginUser=(String)session.getAttribute("loginUser"),loginName=(String)session.getAttribute("loginName"),loginRole=(String)session.getAttribute("loginRole");
-    if(loginUser==null){response.sendRedirect("/CampusNav/campuslogin.jsp");return;}
+    if(loginUser==null){response.sendRedirect("/CAN/campuslogin.jsp");return;}
     String keyword=request.getParameter("keyword");if(keyword==null)keyword="";
     String type=request.getParameter("type");if(type==null)type="";
     String status=request.getParameter("status");if(status==null)status="";
@@ -22,7 +22,7 @@
     private String esc(String s){if(s==null)return "";return s.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;").replace("\"","&quot;");} %>
 <!DOCTYPE html><html lang="ko"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>ICT CampusNav — 자원 검색</title>
+<title>ICT CAN — 자원 검색</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700;9..40,800&family=DM+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -449,27 +449,31 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
 }
 
 </style>
+<link rel="stylesheet" href="/CAN/css/common.css">
 </head><body>
 <div class="topnav">
-  <a href="/CampusNav/main_<%= loginRole %>.jsp" class="logo"><span class="logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>ICT Campus<em>Nav</em></a>
+  <a href="/CAN/main_<%= loginRole %>.jsp" class="logo"><span class="logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>ICT <em>CAN</em></a>
   <div class="nav-right">
     <span style="font-family:var(--mono);font-size:13px;color:var(--txt2)"><i class="bi bi-person-circle me-1"></i><%= loginName %></span>
     <span class="role-chip"><%= "student".equals(loginRole)?"학부생":"assistant".equals(loginRole)?"조교":"professor".equals(loginRole)?"교수":"admin".equals(loginRole)?"관리자":"게스트" %></span>
-    <a href="/CampusNav/main_<%= loginRole %>.jsp" class="chip"><i class="bi bi-house me-1"></i>홈</a>
-    <form action="/CampusNav/logout" method="post" style="margin:0"><button type="submit" class="chip"><i class="bi bi-box-arrow-right me-1"></i>로그아웃</button></form>
+    <a href="/CAN/main_<%= loginRole %>.jsp" class="chip"><i class="bi bi-house me-1"></i>홈</a>
+    <form action="/CAN/logout" method="post" style="margin:0"><button type="submit" class="chip"><i class="bi bi-box-arrow-right me-1"></i>로그아웃</button></form>
   </div>
 </div>
 <div class="shell">
 <div class="hero"><div class="hero-content">
-  <div class="hero-eyebrow">ICT CampusNav · 자원 검색</div>
+  <div class="hero-eyebrow">ICT CAN · 자원 검색</div>
   <div class="hero-title">자산 <em><%= String.format("%,d",totalCount) %>건</em> 검색됨</div>
   <div class="hero-desc">자산번호, 품목명, 위치, 관리부서로 검색하세요.</div>
-  <form method="get" action="/CampusNav/search.jsp"><div class="search-bar">
+  <form method="get" action="/CAN/search.jsp"><div class="search-bar">
     <input type="text" name="keyword" value="<%= keyword %>" placeholder="자산번호, 품목명, 위치 검색...">
     <select name="type"><option value="">전체 분류</option><option value="공기구비품" <%= "공기구비품".equals(type)?"selected":"" %>>공기구비품</option><option value="집기비품" <%= "집기비품".equals(type)?"selected":"" %>>집기비품</option><option value="무형고정자산" <%= "무형고정자산".equals(type)?"selected":"" %>>소프트웨어</option></select>
     <select name="status"><option value="">전체 상태</option><option value="사용중" <%= "사용중".equals(status)?"selected":"" %>>사용중</option><option value="사용가능" <%= "사용가능".equals(status)?"selected":"" %>>사용가능</option></select>
     <button type="submit" class="btn-prim" style="width:auto;white-space:nowrap"><i class="bi bi-search me-1"></i>검색</button>
-    <a href="/CampusNav/search.jsp" class="btn-ghost" style="width:auto;white-space:nowrap">초기화</a>
+    <a href="/CAN/search.jsp" class="btn-ghost" style="width:auto;white-space:nowrap">초기화</a>
+    <% if("admin".equals(loginRole)||"assistant".equals(loginRole)||"professor".equals(loginRole)){ %>
+    <a href="/CAN/asset_manage.jsp?action=new" class="btn-prim" style="width:auto;white-space:nowrap;background:var(--green)"><i class="bi bi-plus-circle me-1"></i>새 자산 등록</a>
+    <% } %>
   </div></form>
 </div></div>
 
@@ -477,7 +481,7 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
 
 <div class="card"><div class="card-head"><div class="ch-icon si-blue">📋</div><div><div class="ch-title">검색 결과</div><div class="ch-sub">총 <%= String.format("%,d",totalCount) %>건 · 페이지 <%= curPage %>/<%= totalPage %></div></div></div>
 <% if(list.isEmpty()){%>
-<div style="text-align:center;padding:48px;color:var(--txt3)"><i class="bi bi-search" style="font-size:32px;display:block;margin-bottom:12px;opacity:.3"></i><div style="font-size:15px">검색 결과가 없습니다.</div><a href="/CampusNav/search.jsp" style="color:var(--blue);font-size:13px">전체 보기</a></div>
+<div style="text-align:center;padding:48px;color:var(--txt3)"><i class="bi bi-search" style="font-size:32px;display:block;margin-bottom:12px;opacity:.3"></i><div style="font-size:15px">검색 결과가 없습니다.</div><a href="/CAN/search.jsp" style="color:var(--blue);font-size:13px">전체 보기</a></div>
 <%}else{%>
 <div style="overflow-x:auto"><table class="tbl">
 <thead><tr><th>자산번호</th><th>분류</th><th>품목명</th><th>위치</th><th>관리부서</th><th>관리자</th><th>상태</th><th>관리</th></tr></thead>
@@ -486,7 +490,7 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
    String st=a.get("st");String bc=st.contains("사용중")?"badge-busy":st.contains("점검")?"badge-warn":"badge-ok";
    String cls=a.get("cls");String cl=cls.equals("무형고정자산")?"badge-purple":cls.equals("집기비품")?"badge-blue":"badge-teal";
    String clsL=cls.equals("무형고정자산")?"SW":cls.equals("집기비품")?"집기":"공기구"; %>
-<tr onclick="location.href='/CampusNav/detail.jsp?id=<%= a.get("no") %>'">
+<tr onclick="location.href='/CAN/detail.jsp?id=<%= a.get("no") %>'">
   <td data-label="자산번호"><span style="font-family:var(--mono);font-size:12px;color:var(--txt3)"><%= a.get("no") %></span></td>
   <td data-label="분류"><span class="<%= cl %>"><%= clsL %></span></td>
   <td data-label="품목명"><div style="font-weight:700;font-size:14px"><%= a.get("name") %></div><div style="font-size:12px;color:var(--txt3)"><%= a.get("model") %></div></td>
@@ -495,10 +499,10 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
   <td data-label="관리자"><span style="font-size:13px"><%= a.get("mgr") %></span></td>
   <td data-label="상태"><span class="<%= bc %>"><%= st.isEmpty()?"정보없음":st %></span></td>
   <td data-label="관리" onclick="event.stopPropagation()">
-    <a href="/CampusNav/detail.jsp?id=<%= a.get("no") %>" class="btn-sm me-1">상세</a>
-    <% if(!"guest".equals(loginRole)){%><a href="/CampusNav/reserve.jsp?id=<%= a.get("no") %>" class="btn-sm">예약</a><%}%>
+    <a href="/CAN/detail.jsp?id=<%= a.get("no") %>" class="btn-sm me-1">상세</a>
+    <% if(!"guest".equals(loginRole)){%><a href="/CAN/reserve.jsp?id=<%= a.get("no") %>" class="btn-sm">예약</a><%}%>
                     <% if("admin".equals(loginRole)||"assistant".equals(loginRole)||"professor".equals(loginRole)){%>
-                    <a href="/CampusNav/asset_manage.jsp?keyword=<%= a.get("no") %>" class="btn-sm" style="border-color:var(--amber);color:var(--amber)">수정/삭제</a>
+                    <a href="/CAN/asset_manage.jsp?keyword=<%= a.get("no") %>" class="btn-sm" style="border-color:var(--amber);color:var(--amber)">수정/삭제</a>
                     <%}%>
   </td>
 </tr>
@@ -506,11 +510,11 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
 </tbody></table></div>
 <div class="pager">
   <%  String encKw=java.net.URLEncoder.encode(keyword,"UTF-8"),encType=java.net.URLEncoder.encode(type,"UTF-8"),encSt=java.net.URLEncoder.encode(status,"UTF-8"); %>
-  <%if(curPage>1){%><a href="/CampusNav/search.jsp?keyword=<%= encKw %>&type=<%= encType %>&status=<%= encSt %>&page=<%= curPage-1 %>" class="pb">‹</a><%}%>
+  <%if(curPage>1){%><a href="/CAN/search.jsp?keyword=<%= encKw %>&type=<%= encType %>&status=<%= encSt %>&page=<%= curPage-1 %>" class="pb">‹</a><%}%>
   <%int sp=Math.max(1,curPage-4),ep=Math.min(totalPage,curPage+4);for(int p2=sp;p2<=ep;p2++){%>
-  <a href="/CampusNav/search.jsp?keyword=<%= encKw %>&type=<%= encType %>&status=<%= encSt %>&page=<%= p2 %>" class="pb <%=p2==curPage?"on":""%>"><%= p2 %></a>
+  <a href="/CAN/search.jsp?keyword=<%= encKw %>&type=<%= encType %>&status=<%= encSt %>&page=<%= p2 %>" class="pb <%=p2==curPage?"on":""%>"><%= p2 %></a>
   <%}%>
-  <%if(curPage<totalPage){%><a href="/CampusNav/search.jsp?keyword=<%= encKw %>&type=<%= encType %>&status=<%= encSt %>&page=<%= curPage+1 %>" class="pb">›</a><%}%>
+  <%if(curPage<totalPage){%><a href="/CAN/search.jsp?keyword=<%= encKw %>&type=<%= encType %>&status=<%= encSt %>&page=<%= curPage+1 %>" class="pb">›</a><%}%>
 </div>
 <%}%>
 </div>
@@ -518,9 +522,9 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
 <!-- ══ SITE FOOTER ══ -->
 <footer class="site-footer">
   <div class="footer-inner">
-    <a href="/CampusNav/campuslogin.jsp" class="footer-logo">
-      <span class="footer-logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>
-      ICT Campus<em>Nav</em>
+    <a href="/CAN/campuslogin.jsp" class="footer-logo">
+      <span class="footer-logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>
+      ICT <em>CAN</em>
     </a>
     <div class="footer-team">
       <strong>Made by AI 소프트웨어학과</strong><br>
@@ -529,7 +533,7 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
     <div class="footer-copy">
       ICT폴리텍대학<br>
       교내 자원 내비게이션 시스템<br>
-      Copyright &copy; 2026 ICT CampusNav. All rights reserved.
+      Copyright &copy; 2026 ICT CAN. All rights reserved.
     </div>
   </div>
 </footer>

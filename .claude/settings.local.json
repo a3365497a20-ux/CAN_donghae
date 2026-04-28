@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -A 15 \"CREATE TABLE \\\\`professors\\\\`\" \"C:/Program Files/Apache Software Foundation/Tomcat 9.0/webapps/ROOT/CAN/nav.sql\")",
+      "Bash(grep -A 30 \"CREATE TABLE \\\\`asset_transfer\\\\`\" \"C:/Program Files/Apache Software Foundation/Tomcat 9.0/webapps/ROOT/CAN/nav.sql\")",
+      "Bash(grep -A 15 \"CREATE TABLE \\\\`prof_subjects\\\\`\" \"C:/Program Files/Apache Software Foundation/Tomcat 9.0/webapps/ROOT/CAN/nav.sql\")",
+      "Bash(cmd *)",
+      "Bash(powershell *)",
+      "Bash(icacls \"C:/Program Files/Apache Software Foundation/Tomcat 9.0/webapps/ROOT/CAN/images/floors/eng1.1.png\")",
+      "Read(//c/Program Files/Apache Software Foundation/Tomcat 9.0/**)",
+      "Bash(bin/catalina.bat version *)",
+      "PowerShell(net *)",
+      "Bash(net stop *)",
+      "Bash(net start *)",
+      "PowerShell(Restart-Service *)",
+      "Bash(\"/c/Program Files/Apache Software Foundation/Tomcat 9.0/bin/shutdown.bat\")",
+      "Bash(\"/c/Program Files/Apache Software Foundation/Tomcat 9.0/bin/startup.bat\")",
+      "Bash(export CATALINA_HOME=\"/c/Program Files/Apache Software Foundation/Tomcat 9.0\")",
+      "Bash('/c/Program Files/Apache Software Foundation/Tomcat 9.0/bin/shutdown.bat')",
+      "Bash('/c/Program Files/Apache Software Foundation/Tomcat 9.0/bin/startup.bat')",
+      "Bash(git add *)"
+    ]
+  }
+}

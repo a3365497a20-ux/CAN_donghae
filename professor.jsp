@@ -4,7 +4,7 @@
     String loginUser = (String) session.getAttribute("loginUser");
     String loginName = (String) session.getAttribute("loginName");
     if (loginUser == null) {
-        response.sendRedirect("/CampusNav/campuslogin.jsp");
+        response.sendRedirect("/CAN/campuslogin.jsp");
         return;
     }
 %>
@@ -13,7 +13,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ICT CampusNav — 교수 자원</title>
+    <title>ICT CAN — 교수 자원</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700;9..40,800&family=DM+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -462,22 +462,23 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
 }
 
 </style>
+<link rel="stylesheet" href="/CAN/css/common.css">
 </head>
 <body>
 
 <!-- 네비바 (ppd4 스타일) -->
 <div class="topnav">
-    <a href="/CampusNav/main_professor.jsp" class="logo">
-        <span class="logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>
-        ICT Campus<em>Nav</em>
+    <a href="/CAN/main_professor.jsp" class="logo">
+        <span class="logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>
+        ICT <em>CAN</em>
     </a>
     <div class="nav-right">
         <span style="font-family:var(--mono);font-size:14px;color:var(--txt2)">
             <i class="bi bi-person-circle me-1"></i><%= loginName %>
         </span>
         <span class="role-chip">교수</span>
-        <a href="/CampusNav/main_professor.jsp" class="chip"><i class="bi bi-house me-1"></i>홈</a>
-        <form action="/CampusNav/logout" method="post" style="margin:0">
+        <a href="/CAN/main_professor.jsp" class="chip"><i class="bi bi-house me-1"></i>홈</a>
+        <form action="/CAN/logout" method="post" style="margin:0">
             <button type="submit" class="chip"><i class="bi bi-box-arrow-right me-1"></i>로그아웃</button>
         </form>
     </div>
@@ -488,7 +489,7 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
     <!-- 히어로 -->
     <div class="hero">
         <div class="hero-content">
-            <div class="hero-eyebrow">ICT CampusNav · 교수 자원</div>
+            <div class="hero-eyebrow">ICT CAN · 교수 자원</div>
             <div class="hero-title">교수도 <em>자원</em>입니다 👨‍🏫</div>
             <div class="hero-desc"><%= loginName %> 교수님의 소프트웨어 자원을 관리하세요.</div>
         </div>
@@ -522,7 +523,7 @@ body { font-size: 15px !important; line-height: 1.7 !important; }
                 <div><div class="ch-title">자원 검색</div><div class="ch-sub">소프트웨어 및 장비 검색</div></div>
             </div>
             <div class="card-body">
-                <form method="get" action="/CampusNav/search.jsp" style="margin-bottom:20px">
+                <form method="get" action="/CAN/search.jsp" style="margin-bottom:20px">
                     <div class="search-bar">
                         <input type="text" name="keyword" placeholder="자원명, 위치, 소프트웨어명 검색...">
                         <button type="submit" class="btn-prim" style="width:auto;white-space:nowrap">
@@ -853,9 +854,9 @@ function cancelEdit() {
 <!-- ══ SITE FOOTER ══ -->
 <footer class="site-footer">
   <div class="footer-inner">
-    <a href="/CampusNav/campuslogin.jsp" class="footer-logo">
-      <span class="footer-logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>
-      ICT Campus<em>Nav</em>
+    <a href="/CAN/campuslogin.jsp" class="footer-logo">
+      <span class="footer-logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>
+      ICT <em>CAN</em>
     </a>
     <div class="footer-team">
       <strong>Made by AI 소프트웨어학과</strong><br>
@@ -864,7 +865,7 @@ function cancelEdit() {
     <div class="footer-copy">
       ICT폴리텍대학<br>
       교내 자원 내비게이션 시스템<br>
-      Copyright &copy; 2026 ICT CampusNav. All rights reserved.
+      Copyright &copy; 2026 ICT CAN. All rights reserved.
     </div>
   </div>
 </footer>

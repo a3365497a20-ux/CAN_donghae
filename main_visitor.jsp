@@ -4,7 +4,7 @@
     String loginName=(String)session.getAttribute("loginName");
     String loginRole=(String)session.getAttribute("loginRole");
     if(loginUser==null||!"visitor".equals(loginRole)){
-        response.sendRedirect("/CampusNav/campuslogin.jsp"); return;
+        response.sendRedirect("/CAN/campuslogin.jsp"); return;
     }
 %>
 <!DOCTYPE html>
@@ -12,7 +12,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ICT CampusNav — 외부인</title>
+<title>ICT CAN — 외부인</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700;9..40,800&family=DM+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -427,24 +427,25 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
 .hero-title em { color:#4ade80 !important; font-style:normal; }
 .hero-desc    { color:rgba(255,255,255,.88) !important; }
 </style>
+<link rel="stylesheet" href="/CAN/css/common.css">
 </head>
 <body>
 
 <!-- TOPNAV -->
 <div class="topnav" style="padding:14px 32px;">
-  <a href="/CampusNav/main_visitor.jsp" class="logo">
-    <span class="logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>
-    ICT Campus<em>Nav</em>
+  <a href="/CAN/main_visitor.jsp" class="logo">
+    <span class="logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>
+    ICT <em>CAN</em>
   </a>
   <div class="nav-right">
     <span style="font-family:var(--mono);font-size:13px;color:var(--txt2)">
       <i class="bi bi-person-circle"></i> <%= loginName %>
     </span>
     <span class="badge-visitor">외부인</span>
-    <a href="/CampusNav/campuslogin.jsp" class="chip" style="border-color:var(--blue);color:var(--blue)">
+    <a href="/CAN/campuslogin.jsp" class="chip" style="border-color:var(--blue);color:var(--blue)">
       <i class="bi bi-box-arrow-in-right"></i> 재학생 로그인
     </a>
-    <form action="/CampusNav/logout" method="post" style="margin:0">
+    <form action="/CAN/logout" method="post" style="margin:0">
       <button type="submit" class="chip"><i class="bi bi-box-arrow-right"></i> 나가기</button>
     </form>
   </div>
@@ -455,7 +456,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
   <!-- HERO -->
   <div class="hero">
     <div class="hero-content">
-      <div class="hero-eyebrow">// ICT CampusNav · 외부인 모드</div>
+      <div class="hero-eyebrow">// ICT CAN · 외부인 모드</div>
       <div class="hero-title">외부인 <em>예약 · 길찾기</em></div>
       <div class="hero-desc">외부 방문자는 공간 예약과 캠퍼스 길찾기만 이용 가능합니다.<br>자원 검색은 재학생 로그인 후 이용하세요.</div>
     </div>
@@ -469,7 +470,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
       <div style="font-weight:700;font-size:15px;color:var(--amber)">외부인 이용 안내</div>
       <div style="font-size:14px;color:var(--txt2);margin-top:2px">
         외부인은 <strong>공간 예약</strong>과 <strong>캠퍼스 길찾기</strong>만 이용 가능합니다.
-        자원 검색 및 상세 조회는 <a href="/CampusNav/campuslogin.jsp" style="color:var(--blue);font-weight:700;text-decoration:none">재학생 로그인 →</a>
+        자원 검색 및 상세 조회는 <a href="/CAN/campuslogin.jsp" style="color:var(--blue);font-weight:700;text-decoration:none">재학생 로그인 →</a>
       </div>
     </div>
   </div>
@@ -548,7 +549,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
         </div>
         <%}%>
 
-        <form method="post" action="/CampusNav/main_visitor.jsp" onsubmit="return checkVisitorTime()">
+        <form method="post" action="/CAN/main_visitor.jsp" onsubmit="return checkVisitorTime()">
           <input type="hidden" name="v_action" value="reserve">
           <div class="row g-3">
             <div class="col-md-6">
@@ -605,7 +606,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
       <div class="locked-title">🔒 자원 검색 — 외부인 이용 불가</div>
       <div class="locked-sub">재학생·교직원만 이용 가능한 기능입니다.</div>
       <div style="margin-top:16px">
-        <a href="/CampusNav/campuslogin.jsp" style="background:var(--blue);color:white;border:none;border-radius:var(--r);padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+        <a href="/CAN/campuslogin.jsp" style="background:var(--blue);color:white;border:none;border-radius:var(--r);padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
           <i class="bi bi-box-arrow-in-right"></i>재학생 로그인하여 이용
         </a>
       </div>
@@ -664,7 +665,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
              style="background:var(--teal);color:white;border:none;border-radius:var(--r);padding:11px;font-size:14px;font-weight:700;text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px">
             <i class="bi bi-geo-alt-fill"></i>현재 위치 길찾기
           </a>
-          <a href="/CampusNav/navigationTest1.jsp"
+          <a href="/CAN/navigationTest1.jsp"
              style="background:transparent;color:var(--txt2);border:1.5px solid var(--line2);border-radius:var(--r);padding:10px;font-size:13px;font-weight:600;text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px">
             <i class="bi bi-map"></i>전체 지도 보기
           </a>
@@ -696,10 +697,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
           </li>
         </ul>
         <div style="margin-top:16px">
-          <a href="https://map.kakao.com/link/to/ICT폴리텍대학,37.396681,127.247918" target="_blank"
-             style="display:block;text-align:center;background:var(--blue);color:white;border:none;border-radius:var(--r);padding:11px;font-size:14px;font-weight:700;text-decoration:none">
-            <i class="bi bi-map me-1"></i>카카오맵으로 오시는 길 보기
-          </a>
+          
         </div>
       </div>
     </div>
@@ -712,9 +710,9 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
 <!-- FOOTER -->
 <footer class="site-footer">
   <div class="footer-inner">
-    <a href="/CampusNav/campuslogin.jsp" class="footer-logo">
-      <span class="footer-logo-dot"><img src="/CampusNav/images/logo.png" alt="ICT"></span>
-      ICT Campus<em>Nav</em>
+    <a href="/CAN/campuslogin.jsp" class="footer-logo">
+      <span class="footer-logo-dot"><img src="/CAN/images/logo.png" alt="ICT"></span>
+      ICT <em>CAN</em>
     </a>
     <div class="footer-team">
       <strong>Made by AI 소프트웨어학과</strong><br>
@@ -722,7 +720,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
     </div>
     <div class="footer-copy">
       ICT폴리텍대학 교내 자원 내비게이션 시스템<br>
-      Copyright &copy; 2026 ICT CampusNav. All rights reserved.
+      Copyright &copy; 2026 ICT CAN. All rights reserved.
     </div>
   </div>
 </footer>
@@ -732,7 +730,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:15p
 /* ══ 길찾기 ══ */
 function goNav() {
   var dest = document.getElementById('navDest').value.trim();
-  var url  = '/CampusNav/navigationTest1.jsp';
+  var url  = '/CAN/navigationTest1.jsp';
   if(dest) url += '?destName=' + encodeURIComponent(dest);
   var msg = document.getElementById('navMsg');
   msg.innerHTML = '<i class="bi bi-compass me-1"></i>' +
